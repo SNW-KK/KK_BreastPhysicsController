@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace BreastPhysicsController.UserInterface
+namespace BreastPhysicsController
 {
-    class Toggle
+    public class Toggle
     {
         string _text;
         public bool changed;

@@ -6,7 +6,7 @@ using BepInEx.Logging;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BreastPhysicsController.UserInterface
+namespace BreastPhysicsController
 {
     class SliderAndTextBox
     {

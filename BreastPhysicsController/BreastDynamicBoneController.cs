@@ -7,6 +7,7 @@ using BepInEx.Logging;
 using ExtensibleSaveFormat;
 using KKAPI;
 using KKAPI.Chara;
+using UnityEngine;
 
 namespace BreastPhysicsController
 {
@@ -56,7 +57,15 @@ namespace BreastPhysicsController
             enable = false;
             if (ChaControl.sex==1) //Female
             {
-                ControllerManager.updatedCharaList = true;
+                BreastPhysicsController.w_NeedUpdateCharaList = true;
+                //ControllerManager.updatedCharaList = true;
+                //ControllerManager manager=gameObject.GetComponent(typeof(ControllerManager)) as ControllerManager;
+                //if(manager!=null)
+                //manager.updatedCharaList = true;
+
+
+
+
                 DynamicBoneParameter = new BreastDynamicBoneParameter();
                 onDisable = false;
                 save = false;
@@ -103,7 +112,14 @@ namespace BreastPhysicsController
 
         protected override void OnDestroy()
         {
-            ControllerManager.updatedCharaList = true;
+            BreastPhysicsController.w_NeedUpdateCharaList = true;
+            //ControllerManager.updatedCharaList = true;
+            //ControllerManager manager = gameObject.GetComponent(typeof(ControllerManager)) as ControllerManager;
+            //if (manager != null)
+            //    manager.updatedCharaList = true;
+
+
+
             base.OnDestroy();
         }
 

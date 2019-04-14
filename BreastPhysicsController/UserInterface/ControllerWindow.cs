@@ -5,25 +5,25 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BreastPhysicsController.UserInterface
+namespace BreastPhysicsController
 {
-    class ControllerWindow
+    public class ControllerWindow
     {
-        readonly string windowTitle = "BreastPhysicsController";
+        public readonly string windowTitle = "BreastPhysicsController";
         public int windowID;
+        
 
         //Flags
         public bool onDisable = false;
         public bool parameterChanged = false;
-        public bool needRefreshValue = false;
         public bool showWindow = false;
 
         //GUI Component
-        private Rect WindowRect = new Rect(10, 10, 300, 900);
-        private Toggle controllEnable,irc01, irc02, irc03;
+        public Rect WindowRect = new Rect(10, 10, 300, 900);
+        public Toggle controllEnable,irc01, irc02, irc03;
         private SliderAndTextBox damping01, damping02, damping03, elasticity01, elasticity02, elasticity03,
             stiffness01, stiffness02, stiffness03, inert01, inert02, inert03;
-        private DropDownBox charaSelect;
+        public DropDownBox charaSelect;
 
         public ControllerWindow(int windowID)
         {
@@ -35,7 +35,7 @@ namespace BreastPhysicsController.UserInterface
         {
 
             charaSelect = new DropDownBox(ControllerManager.GetAllController().Select(x => x.ChaFileControl.parameter.fullname).ToArray(),
-                ControllerManager.GetAllController().Select(x => x.controllerID).ToArray(), "Character not loaded", 0, 25);
+                ControllerManager.GetAllController().Select(x => x.controllerID).ToArray(), "Character not loaded", 0, 25,WindowRect.height-50);
 
             controllEnable = new Toggle("Enable controller", false);
 
@@ -59,51 +59,7 @@ namespace BreastPhysicsController.UserInterface
 
         }
 
-        public void OnGUI()
-        {
-            if (showWindow)
-            {
-                WindowRect = GUI.Window(1192, WindowRect, Draw, windowTitle);
-            }
-
-            if(charaSelect.changed)
-            {
-                needRefreshValue = true;
-            }
-
-            RefreshCharaListNeeded();
-            RefreshValueNeeded();
-
-            if(controllEnable.changed)
-            {
-                BreastDynamicBoneController controller = ControllerManager.GetControllerByID(charaSelect.GetSelectedId());
-                if (controllEnable.GetValue())
-                {
-                    ApplyParameterToController(controller);
-                }
-                else
-                {
-                    controller.onDisable = true;
-                }
-            }
-
-            CheckParameterChanged();
-            if (parameterChanged)
-            {
-                parameterChanged = false;
-                BreastDynamicBoneController controller = ControllerManager.GetControllerByID(charaSelect.GetSelectedId());
-                ApplyParameterToController(controller);
-            }
-        }
-
-        private void OnDisable()
-        {
-            BreastDynamicBoneController controller = ControllerManager.GetControllerByID(charaSelect.GetSelectedId());
-            onDisable = false;
-            controller.onDisable = true;
-        }
-
-        private void Draw(int windowID)
+        public  void Draw(int windowID)
         {
 
             GUILayout.BeginArea(new Rect(10, 30, WindowRect.width-20, WindowRect.height-60));
@@ -167,27 +123,23 @@ namespace BreastPhysicsController.UserInterface
             
         }
 
-        public void RefreshCharaListNeeded()
+        public void RefreshCharaList()
         {
-            if (!ControllerManager.updatedCharaList) return;
-            ControllerManager.updatedCharaList = false;
-
             List<BreastDynamicBoneController> controllers=ControllerManager.GetAllController();
             List<string> chaNameList = new List<string>();
             List<int> chaIdList = new List<int>();
-            foreach(BreastDynamicBoneController controller in controllers)
+            foreach (BreastDynamicBoneController controller in controllers)
             {
                 chaNameList.Add(controller.ChaFileControl.parameter.fullname);
                 chaIdList.Add(controller.controllerID);
             }
             charaSelect.SetList(chaNameList.ToArray(),chaIdList.ToArray());
-            needRefreshValue = true;
 
         }
 
-        public void RefreshValueNeeded()
+        public void RefreshValue()
         {
-            if (!needRefreshValue) return;
+            //if (!needRefreshValue) return;
             BreastDynamicBoneController controller=ControllerManager.GetControllerByID(charaSelect.GetSelectedId());
             if (controller == null) return;
 
@@ -213,11 +165,9 @@ namespace BreastPhysicsController.UserInterface
             elasticity03.SetValue(parameterSet03.Elasticity);
             stiffness03.SetValue(parameterSet03.Stiffness);
             inert03.SetValue(parameterSet03.Inert);
-
-            needRefreshValue = false;
         }
 
-        private void ApplyParameterToController(BreastDynamicBoneController controller)
+        public void ApplyParameterToController(BreastDynamicBoneController controller)
         {
             controller.enable = controllEnable.GetValue();
 
@@ -246,7 +196,7 @@ namespace BreastPhysicsController.UserInterface
             controller.needUpdate = true;
         }
 
-        private bool CheckParameterChanged()
+        public bool CheckParameterChanged()
         {
             parameterChanged = irc01.changed | irc02.changed | irc03.changed |
                     damping01.changed | damping02.changed | damping03.changed |

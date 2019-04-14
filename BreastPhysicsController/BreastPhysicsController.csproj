@@ -51,9 +51,11 @@
     </Reference>
     <Reference Include="ExtensibleSaveFormat">
       <HintPath>..\..\..\ExternalLib\BreastPhysicsController\ExtensibleSaveFormat.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="KKAPI">
       <HintPath>..\..\..\ExternalLib\BreastPhysicsController\KKAPI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
