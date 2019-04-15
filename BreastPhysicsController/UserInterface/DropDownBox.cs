@@ -86,11 +86,11 @@ namespace BreastPhysicsController
                 }
                 else
                 {
-                    if(_width>0) _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.Width(_width + 20), GUILayout.Height(_list.Count() * _height + 20));
-                    else _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.Height(_list.Count() * _height + 20));
+                    if(_width>0) _scroll = GUILayout.BeginScrollView(_scroll, false,false,GUILayout.Width(_width + 30), GUILayout.Height(_maxHeight));
+                    else _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.Height(_list.Count() * _height));
 
                     int selected = -1;
-                    selected = GUILayout.SelectionGrid(selected, _list, 1, GUILayout.Height(_list.Count() * _height));
+                    selected = GUILayout.SelectionGrid(selected, _list, 1, GUILayout.Width(_width),GUILayout.Height(_list.Count() * _height));
                     
                     if (selected>-1)
                     {

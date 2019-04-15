@@ -19,7 +19,7 @@ namespace BreastPhysicsController
         public bool showWindow = false;
 
         //GUI Component
-        public Rect WindowRect = new Rect(10, 10, 300, 900);
+        public Rect WindowRect = new Rect(10, 10, 300, 1000);
         public Toggle controllEnable,irc01, irc02, irc03;
         private SliderAndTextBox damping01, damping02, damping03, elasticity01, elasticity02, elasticity03,
             stiffness01, stiffness02, stiffness03, inert01, inert02, inert03;
@@ -35,7 +35,7 @@ namespace BreastPhysicsController
         {
 
             charaSelect = new DropDownBox(ControllerManager.GetAllController().Select(x => x.ChaFileControl.parameter.fullname).ToArray(),
-                ControllerManager.GetAllController().Select(x => x.controllerID).ToArray(), "Character not loaded", 0, 25,WindowRect.height-50);
+                ControllerManager.GetAllController().Select(x => x.controllerID).ToArray(), "Character not loaded", WindowRect.width-80, 25,WindowRect.height-50);
 
             controllEnable = new Toggle("Enable controller", false);
 
@@ -109,6 +109,31 @@ namespace BreastPhysicsController
                 stiffness03.Draw();
                 inert03.Draw();
                 GUILayout.Space(10);
+
+                //Button Load from chara
+                if(GUILayout.Button("Load from chara", GUILayout.Width(150)))
+                {
+                    BreastDynamicBoneController controller = ControllerManager.GetControllerByID(charaSelect.GetSelectedId());
+                    if (controller != null) controller.LoadParamsFromCharacter();
+                }
+
+                //Button Save
+                if (GUILayout.Button("Save", GUILayout.Width(150)))
+                {
+                    BreastDynamicBoneController controller = ControllerManager.GetControllerByID(charaSelect.GetSelectedId());
+                    if (controller != null) controller.DynamicBoneParameter.SaveFile(@".\BepInEx\BreastPhysicsController\parameter.xml", true);
+                }
+
+                //Button Load
+                if (GUILayout.Button("Load", GUILayout.Width(150)))
+                {
+                    BreastDynamicBoneController controller = ControllerManager.GetControllerByID(charaSelect.GetSelectedId());
+                    if (controller != null)
+                    {
+                        controller.DynamicBoneParameter.LoadFile(@".\BepInEx\BreastPhysicsController\parameter.xml");
+                        BreastPhysicsController.w_NeedUpdateValue = true;
+                    }
+                }
             }
 
 
@@ -130,8 +155,11 @@ namespace BreastPhysicsController
             List<int> chaIdList = new List<int>();
             foreach (BreastDynamicBoneController controller in controllers)
             {
-                chaNameList.Add(controller.ChaFileControl.parameter.fullname);
-                chaIdList.Add(controller.controllerID);
+                if (controller.ChaControl.sex == 1)
+                {
+                    chaNameList.Add(controller.ChaFileControl.parameter.fullname);
+                    chaIdList.Add(controller.controllerID);
+                }
             }
             charaSelect.SetList(chaNameList.ToArray(),chaIdList.ToArray());
 

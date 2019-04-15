@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BreastPhysicsController</RootNamespace>
-    <AssemblyName>BreastPhysicsContoller</AssemblyName>
+    <AssemblyName>BreastPhysicsController</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -84,11 +84,12 @@
     <Compile Include="Hooks.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XMLDynamicBoneParameter.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /Y "$(TargetDir)BreastPhysicsContoller.dll" "E:\Illusion\Koikatsu\BepInEx\"</PostBuildEvent>
+    <PostBuildEvent>xcopy /Y "$(TargetDir)BreastPhysicsController.dll" "E:\Illusion\Koikatsu\BepInEx\"</PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

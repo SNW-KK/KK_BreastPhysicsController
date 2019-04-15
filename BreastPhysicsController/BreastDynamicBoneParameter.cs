@@ -23,7 +23,9 @@ namespace BreastPhysicsController
 
             for(int i=0;i< targetBoneNames.Count();i++)
             {
-                dictParameterSet.Add(targetBoneNames[i], new ParameterSet());
+                ParameterSet set = new ParameterSet();
+                set.BoneName = targetBoneNames[i];
+                dictParameterSet.Add(targetBoneNames[i], set);
             }
 
         }
@@ -130,85 +132,98 @@ namespace BreastPhysicsController
 
         public bool LoadParamsFromCharacter(BreastDynamicBoneController controller)
         {
-
-            DynamicBone_Ver02 breastL = controller.ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
-            DynamicBone_Ver02 breastR = controller.ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
-
-            foreach (DynamicBone_Ver02.BoneParameter param in breastL.Patterns[0].Params)
+            if (controller.ChaControl.dictDynamicBoneBust != null)
             {
-                if (targetBoneNames.Contains(param.Name))
+                DynamicBone_Ver02 breastL, breastR;
+
+                breastL = controller.ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
+                breastR = controller.ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
+
+                foreach (DynamicBone_Ver02.BoneParameter param in breastL.Patterns[0].Params)
                 {
-                    dictParameterSet[param.Name].BoneName = param.Name;
-                    dictParameterSet[param.Name].CopyParameterFrom(param);
+                    if (targetBoneNames.Contains(param.Name))
+                    {
+                        dictParameterSet[param.Name].BoneName = param.Name;
+                        dictParameterSet[param.Name].CopyParameterFrom(param);
+                    }
                 }
+
+                foreach (DynamicBone_Ver02.BoneParameter param in breastR.Patterns[0].Params)
+                {
+                    if (targetBoneNames.Contains(param.Name))
+                    {
+                        dictParameterSet[param.Name].BoneName = param.Name;
+                        dictParameterSet[param.Name].CopyParameterFrom(param);
+                    }
+                }
+
+                return true;
             }
 
-            foreach (DynamicBone_Ver02.BoneParameter param in breastR.Patterns[0].Params)
-            {
-                if (targetBoneNames.Contains(param.Name))
-                {
-                    dictParameterSet[param.Name].BoneName = param.Name;
-                    dictParameterSet[param.Name].CopyParameterFrom(param);
-                }
-            }
 
-            return true;
+            return false;
         }
 
         public bool LoadParamsFromCharacter(ChaControl chaCtrl)
-        {
+        { 
             BreastDynamicBoneController dbc = chaCtrl.GetComponent<BreastDynamicBoneController>();
             if (dbc==null || !dbc.haveValidDynamicBoneParam()) return false;
 
-            DynamicBone_Ver02 breastL = chaCtrl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
-            DynamicBone_Ver02 breastR = chaCtrl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
-
-            foreach (DynamicBone_Ver02.BoneParameter param in breastL.Patterns[0].Params)
+            DynamicBone_Ver02 breastL, breastR;
+            if (chaCtrl.dictDynamicBoneBust!=null)
             {
-                if (targetBoneNames.Contains(param.Name))
+                breastL = chaCtrl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
+                breastR = chaCtrl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
+
+                if(breastL!=null && breastR!=null)
                 {
-                    dictParameterSet[param.Name].BoneName = param.Name;
-                    dictParameterSet[param.Name].CopyParameterFrom(param);
+                    foreach (DynamicBone_Ver02.BoneParameter param in breastL.Patterns[0].Params)
+                    {
+                        if (targetBoneNames.Contains(param.Name))
+                        {
+                            dictParameterSet[param.Name].BoneName = param.Name;
+                            dictParameterSet[param.Name].CopyParameterFrom(param);
+                        }
+                    }
+
+                    foreach (DynamicBone_Ver02.BoneParameter param in breastR.Patterns[0].Params)
+                    {
+                        if (targetBoneNames.Contains(param.Name))
+                        {
+                            dictParameterSet[param.Name].BoneName = param.Name;
+                            dictParameterSet[param.Name].CopyParameterFrom(param);
+                        }
+                    }
+
+                    return true;
                 }
             }
-
-            foreach (DynamicBone_Ver02.BoneParameter param in breastR.Patterns[0].Params)
-            {
-                if (targetBoneNames.Contains(param.Name))
-                {
-                    dictParameterSet[param.Name].BoneName = param.Name;
-                    dictParameterSet[param.Name].CopyParameterFrom(param);
-                }
-            }
-
-            return true;
+            return false;
         }
 
-        public bool SaveFile(string path)
+        public bool SaveFile(string path,bool overwrite)
         {
-
+            FileMode mode;
+            if (overwrite) mode = FileMode.Create;
+            else mode = FileMode.CreateNew;
             try
             {
-
-                if (!Directory.Exists(Path.GetDirectoryName(configPath)))
+                using (FileStream fs = new FileStream(path, mode, FileAccess.Write))
+                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(configPath));
-                }
-
-                using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write))
-                using (BinaryWriter writer = new BinaryWriter(fs))
-                {
-                    byte[] byteConfig = GetParamByte();
-                    writer.Write(byteConfig, 0, byteConfig.Length);
+                    XMLDynamicBoneParameter paramterXML = new XMLDynamicBoneParameter(this);
+                    paramterXML.Serialize(sw);
                 }
 
             }
-            catch (System.IO.FileNotFoundException e)
+            catch(Exception e)
             {
-                System.Diagnostics.Debug.WriteLine(e.ToString());
-                throw;
-            }
 
+                Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "Failed XMLSerialization,Cant save BreastDymamicBoneParameter to XML.");
+                Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, e.ToString());
+                return false;
+
+            }
             return true;
         }
 
@@ -217,21 +232,34 @@ namespace BreastPhysicsController
             try
             {
                 using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
-                using (BinaryReader reader = new BinaryReader(fs))
+                using (StreamReader sr= new StreamReader(fs, Encoding.UTF8))
                 {
-                    byte[] byteConfig = new byte[fs.Length];
-                    reader.Read(byteConfig, 0, byteConfig.Length);
+                    XMLDynamicBoneParameter parameterXML = new XMLDynamicBoneParameter();
+                    if (!parameterXML.Deserialize(sr))
+                    {
+                        Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "Failed XML Deserialize");
+                        return false;
+                    }
 
-                    if (!SetParamByte(byteConfig)) return false;
-
+                    FileStream loadedFS = new FileStream(@".\BepInEx\BreastPhysicsController\Loaded.xml", FileMode.Create, FileAccess.Write);
+                    StreamWriter sw = new StreamWriter(loadedFS, Encoding.UTF8);
+                    parameterXML.Serialize(sw);
+                    sw.Close();
+                    loadedFS.Close();
+                    
+                    dictParameterSet["cf_j_bust01_L"].CopyParameterFrom(parameterXML.GetParameterSet("Bust01"));
+                    dictParameterSet["cf_j_bust02_L"].CopyParameterFrom(parameterXML.GetParameterSet("Bust02"));
+                    dictParameterSet["cf_j_bust03_L"].CopyParameterFrom(parameterXML.GetParameterSet("Bust03"));
+                    dictParameterSet["cf_j_bust01_R"].CopyParameterFrom(parameterXML.GetParameterSet("Bust01"));
+                    dictParameterSet["cf_j_bust02_R"].CopyParameterFrom(parameterXML.GetParameterSet("Bust02"));
+                    dictParameterSet["cf_j_bust03_R"].CopyParameterFrom(parameterXML.GetParameterSet("Bust03"));
                 }
             }
-            catch (System.Exception e)
+            catch(Exception e)
             {
-                Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, e.ToString());
+                Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "Failed load parameter from file.");
                 return false;
             }
-
             return true;
         }
 
@@ -281,6 +309,25 @@ namespace BreastPhysicsController
                 return true;
             }
 
+
+            public bool CopyParameterFrom(ParameterSetXML paramterXML)
+            {
+                try
+                {
+                    IsRotationCalc = paramterXML.IsRotationCalc;
+                    Damping = paramterXML.Damping;
+                    Elasticity = paramterXML.Elasticity;
+                    Stiffness = paramterXML.Stiffness;
+                    Inert = paramterXML.Inert;
+                }
+                catch (Exception e)
+                {
+                    Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "Failed copy DynamicBoneParam.");
+                    return false;
+                }
+                return true;
+            }
+
             public void CopyParameterTo(DynamicBone_Ver02.BoneParameter parameter)
             {
                 parameter.IsRotationCalc = IsRotationCalc;
@@ -290,6 +337,7 @@ namespace BreastPhysicsController
                 parameter.Inert = Inert;
             }
         }
+
     }
 
 

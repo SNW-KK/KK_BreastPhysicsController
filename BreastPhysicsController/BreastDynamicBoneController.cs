@@ -85,11 +85,11 @@ namespace BreastPhysicsController
                             enable = (bool)cardEnable;
                         }
                     }
-                    else
-                    {
-                        DynamicBoneParameter.LoadParamsFromCharacter(ChaControl);
-                        Logger.LogFormatted(LogLevel.Debug, "Failed load DynamicBone parameters from ExtendedData. BrestDynamicBoneController is disabled.");
-                    }
+                    //else
+                    //{
+                    //    DynamicBoneParameter.LoadParamsFromCharacter(ChaControl);
+                    //    Logger.LogFormatted(LogLevel.Debug, "Failed load DynamicBone parameters from ExtendedData. BrestDynamicBoneController is disabled.");
+                    //}
                 }
                 else
                 {
@@ -150,6 +150,26 @@ namespace BreastPhysicsController
             ChaControl.UpdateBustSoftness();
             ChaControl.reSetupDynamicBoneBust = true;
         }
+
+        public bool LoadParamsFromCharacter()
+        {
+            Logger.LogFormatted(LogLevel.Debug, "Call LoadParamsFromCharacter");
+            if (!haveValidDynamicBoneParam())
+            {
+                Logger.LogFormatted(LogLevel.Debug, "LoadParamsFromCharacter:Failed haveValidDynamicBoneParam");
+                return false;
+            }
+            bool success= DynamicBoneParameter.LoadParamsFromCharacter(this);
+            if(success)
+            {
+                Logger.LogFormatted(LogLevel.Debug, "LoadParamsFromCharacter:Success LoadParamsFromCharacter");
+                BreastPhysicsController.w_NeedUpdateValue = true;
+                return true;
+            }
+            Logger.LogFormatted(LogLevel.Debug, "LoadParamsFromCharacter:Failed LoadParamsFromCharacter");
+            return false;
+        }
+            
 
         public void ApplyBreastDynamicBoneParams()
         {
@@ -235,19 +255,19 @@ namespace BreastPhysicsController
             DynamicBone_Ver02 breastR = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
             foreach (string boneName in BreastDynamicBoneParameter.targetBoneNames)
             {
-                foreach (DynamicBone_Ver02.BoneParameter param in breastL.Patterns[0].Params)
-                {
-                    if (param.Name == boneName) continue;
-                }
-                foreach (DynamicBone_Ver02.BoneParameter param in breastR.Patterns[0].Params)
-                {
-                    if (param.Name == boneName) continue;
-                }
-                return false;
+                if (!ContainBoneName(breastL, boneName) && !ContainBoneName(breastR, boneName)) return false;
             }
             return true;
         }
 
+        private bool ContainBoneName(DynamicBone_Ver02 dynamicBone,string boneName)
+        {
+            foreach(DynamicBone_Ver02.BoneParameter paramter in dynamicBone.Patterns[0].Params)
+            {
+                if (paramter.Name == boneName) return true;
+            }
 
+            return false;
+        }
     }
 }
