@@ -20,10 +20,18 @@ namespace BreastPhysicsController
         public static void BustSoftReCalc(BustSoft __instance)
         {
             BreastDynamicBoneController controller = ControllerManager.GetControllerByBustSoft(__instance);
-            if(controller!=null && controller.enable)
+            if(controller!=null)
             {
-                controller.needUpdate = true;
+                //if (controller.needInitialLoad)
+                //{
+                //    controller.InitialLoadParameter();
+                //}
+                if (controller.enable)
+                {
+                    controller.needUpdate = true;
+                }
             }
+
         }
     }
 }

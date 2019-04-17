@@ -15,12 +15,13 @@ namespace BreastPhysicsController
     {
         public readonly static string GUID = "BreastDynamicBoneController";
         public const string ExtendedDataKey = "BrestDynamicBoneParameter";
+        public bool enable;
         public BreastDynamicBoneParameter DynamicBoneParameter;
         public int controllerID;
         public bool save;
-        public bool enable;
         public bool onDisable;
         public bool needUpdate;
+        //public bool needInitialLoad;
 
         protected override void Update()
         {
@@ -55,55 +56,119 @@ namespace BreastPhysicsController
         protected override void OnReload(GameMode currentGameMode)
         {
             enable = false;
-            if (ChaControl.sex==1) //Female
+            if (ChaControl.sex == 1) //Female
             {
                 BreastPhysicsController.w_NeedUpdateCharaList = true;
-                //ControllerManager.updatedCharaList = true;
-                //ControllerManager manager=gameObject.GetComponent(typeof(ControllerManager)) as ControllerManager;
-                //if(manager!=null)
-                //manager.updatedCharaList = true;
 
-
-
-
-                DynamicBoneParameter = new BreastDynamicBoneParameter();
+                DynamicBoneParameter = new BreastDynamicBoneParameter(this);
                 onDisable = false;
                 save = false;
                 controllerID = this.GetInstanceID();
-                needUpdate = true;
-
-                var data = GetExtendedData();
-                var byteDBParams = new object();
-                if(data!=null && data.data.TryGetValue(ExtendedDataKey, out byteDBParams) && byteDBParams is byte[])
-                {
-                    if(DynamicBoneParameter.SetParamByte((byte[])byteDBParams))
-                    {
-                        var cardEnable = new object();
-                        if(data.data.TryGetValue("Enable", out cardEnable) && cardEnable is bool)
-                        {
-                            Logger.LogFormatted(LogLevel.Debug, "DynamicBoneParameter was loaded from ExtendedData.");
-                            enable = (bool)cardEnable;
-                        }
-                    }
-                    //else
-                    //{
-                    //    DynamicBoneParameter.LoadParamsFromCharacter(ChaControl);
-                    //    Logger.LogFormatted(LogLevel.Debug, "Failed load DynamicBone parameters from ExtendedData. BrestDynamicBoneController is disabled.");
-                    //}
-                }
-                else
-                {
-                    DynamicBoneParameter.LoadParamsFromCharacter(this);
-                }
+                needUpdate = false;
+                //needInitialLoad = true;
+                InitialLoadParameter();
             }
             else //Male
             {
                 DynamicBoneParameter = null;
                 save = false;
+                enable = false;
+                onDisable = false;
                 needUpdate = false;
-                //BreastPhysicsController.newCharaLoaded = false;
+                //needInitialLoad = false;
             }
         }
+
+        public void InitialLoadParameter()
+        {
+            //needInitialLoad = false;
+
+            var data = GetExtendedData();
+            var byteDBParams = new object();
+            if (data != null && data.data.TryGetValue(ExtendedDataKey, out byteDBParams) && byteDBParams is byte[])
+            {
+                if (DynamicBoneParameter.SetParamByte((byte[])byteDBParams))
+                {
+                    var cardEnable = new object();
+                    if (data.data.TryGetValue("Enable", out cardEnable) && cardEnable is bool)
+                    {
+                        Logger.LogFormatted(LogLevel.Debug, "DynamicBoneParameter was loaded from ExtendedData.");
+                        enable = (bool)cardEnable;
+                        needUpdate = true;
+                        //Logger.LogFormatted(LogLevel.Debug, DynamicBoneParameter.ToString());
+                    }
+                    else
+                    {
+                        enable = false;
+                        Logger.LogFormatted(LogLevel.Debug, "DynamicBoneParameter readed,but controller is disabled.");
+                    }
+                    //ApplyBreastDynamicBoneParams();
+                }
+                else
+                {
+                    //DynamicBoneParameter.LoadParamsFromCharacter(ChaControl);
+                    Logger.LogFormatted(LogLevel.Debug, "Loaded parameters from ExtendedData is invalid. BrestDynamicBoneController is disabled.");
+                }
+            }
+            else
+            {
+                Logger.LogFormatted(LogLevel.Debug, "DynamicBoneParameter is not saved in card.");
+                //DynamicBoneParameter.LoadParamsFromCharacter(this);
+            }
+        }
+
+        //protected override void OnReload(GameMode currentGameMode)
+        //{
+        //    enable = false;
+        //    if (ChaControl.sex == 1) //Female
+        //    {
+        //        BreastPhysicsController.w_NeedUpdateCharaList = true;
+
+        //        DynamicBoneParameter = new BreastDynamicBoneParameter(this);
+        //        onDisable = false;
+        //        save = false;
+        //        controllerID = this.GetInstanceID();
+        //        needUpdate = true;
+
+        //        var data = GetExtendedData();
+        //        var byteDBParams = new object();
+        //        if (data != null && data.data.TryGetValue(ExtendedDataKey, out byteDBParams) && byteDBParams is byte[])
+        //        {
+        //            if (DynamicBoneParameter.SetParamByte((byte[])byteDBParams))
+        //            {
+        //                var cardEnable = new object();
+        //                if (data.data.TryGetValue("Enable", out cardEnable) && cardEnable is bool)
+        //                {
+        //                    Logger.LogFormatted(LogLevel.Debug, "DynamicBoneParameter was loaded from ExtendedData.");
+        //                    enable = (bool)cardEnable;
+        //                }
+        //                else
+        //                {
+        //                    Logger.LogFormatted(LogLevel.Debug, "DynamicBoneParameter readed,but controller is disabled.");
+        //                }
+        //            }
+        //            else
+        //            {
+        //                DynamicBoneParameter.LoadParamsFromCharacter(ChaControl);
+        //                Logger.LogFormatted(LogLevel.Debug, "Loaded parameters from ExtendedData is invalid. BrestDynamicBoneController is disabled.");
+        //            }
+        //        }
+        //        else
+        //        {
+        //            Logger.LogFormatted(LogLevel.Debug, "DynamicBoneParameter is not saved in card.");
+        //            //DynamicBoneParameter.LoadParamsFromCharacter(this);
+        //            LoadParamsFromCharacter();
+        //        }
+        //    }
+        //    else //Male
+        //    {
+        //        DynamicBoneParameter = null;
+        //        save = false;
+        //        needUpdate = false;
+        //    }
+        //}
+
+
 
         private void OnDisable()
         {
@@ -113,12 +178,6 @@ namespace BreastPhysicsController
         protected override void OnDestroy()
         {
             BreastPhysicsController.w_NeedUpdateCharaList = true;
-            //ControllerManager.updatedCharaList = true;
-            //ControllerManager manager = gameObject.GetComponent(typeof(ControllerManager)) as ControllerManager;
-            //if (manager != null)
-            //    manager.updatedCharaList = true;
-
-
 
             base.OnDestroy();
         }
@@ -177,12 +236,14 @@ namespace BreastPhysicsController
             DynamicBone_Ver02 breastL = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
             if (breastL != null)
             {
+                //Logger.LogFormatted(LogLevel.Debug, "ApplyBreastDynamicBoneParams to BrestL");
                 ApplyBreastDynamicBoneParams(breastL);
             }
 
             DynamicBone_Ver02 breastR = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
             if (breastR != null)
             {
+                //Logger.LogFormatted(LogLevel.Debug, "ApplyBreastDynamicBoneParams to BrestR");
                 ApplyBreastDynamicBoneParams(breastR);
             }
 

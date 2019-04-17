@@ -16,11 +16,13 @@ namespace BreastPhysicsController
 
         public static readonly string configPath = @".\BepInEx\BreastPhysicsContoller\config.dat";
 
+        public BreastDynamicBoneController _controller;
+
         public Dictionary<string, ParameterSet> dictParameterSet = new Dictionary<string, ParameterSet>();
 
-        public BreastDynamicBoneParameter()
+        public BreastDynamicBoneParameter(BreastDynamicBoneController controller)
         {
-
+            _controller = controller;
             for(int i=0;i< targetBoneNames.Count();i++)
             {
                 ParameterSet set = new ParameterSet();
@@ -55,6 +57,7 @@ namespace BreastPhysicsController
                 return false;
             }
             dictParameterSet = readedParams;
+
             return true;
         }
 
@@ -84,51 +87,7 @@ namespace BreastPhysicsController
             return true;
         }
 
-        public void SetDefaultParams()
-        {
-            dictParameterSet["cf_j_bust01_L"].BoneName = "cf_j_bust01_L";
-            dictParameterSet["cf_j_bust01_L"].IsRotationCalc = false;
-            dictParameterSet["cf_j_bust01_L"].Damping = 0.01f;
-            dictParameterSet["cf_j_bust01_L"].Elasticity = 0.8f;
-            dictParameterSet["cf_j_bust01_L"].Stiffness = 0.15f;
-            dictParameterSet["cf_j_bust01_L"].Inert = 0.2f;
 
-            dictParameterSet["cf_j_bust02_L"].BoneName = "cf_j_bust02_L";
-            dictParameterSet["cf_j_bust02_L"].IsRotationCalc = true;
-            dictParameterSet["cf_j_bust02_L"].Damping = 0.9f;
-            dictParameterSet["cf_j_bust02_L"].Elasticity = 0.8f;
-            dictParameterSet["cf_j_bust02_L"].Stiffness = 0.15f;
-            dictParameterSet["cf_j_bust02_L"].Inert = 0.01f;
-
-            dictParameterSet["cf_j_bust03_L"].BoneName = "cf_j_bust03_L";
-            dictParameterSet["cf_j_bust03_L"].IsRotationCalc = true;
-            dictParameterSet["cf_j_bust03_L"].Damping = 0.99f;
-            dictParameterSet["cf_j_bust03_L"].Elasticity = 0.5f;
-            dictParameterSet["cf_j_bust03_L"].Stiffness = 0.08f;
-            dictParameterSet["cf_j_bust03_L"].Inert = 0.01f;
-
-            dictParameterSet["cf_j_bust01_R"].BoneName = "cf_j_bust01_R";
-            dictParameterSet["cf_j_bust01_R"].IsRotationCalc = false;
-            dictParameterSet["cf_j_bust01_R"].Damping = 0.01f;
-            dictParameterSet["cf_j_bust01_R"].Elasticity = 0.8f;
-            dictParameterSet["cf_j_bust01_R"].Stiffness = 0.15f;
-            dictParameterSet["cf_j_bust01_R"].Inert = 0.2f;
-
-            dictParameterSet["cf_j_bust02_R"].BoneName = "cf_j_bust02_R";
-            dictParameterSet["cf_j_bust02_R"].IsRotationCalc = true;
-            dictParameterSet["cf_j_bust02_R"].Damping = 0.9f;
-            dictParameterSet["cf_j_bust02_R"].Elasticity = 0.8f;
-            dictParameterSet["cf_j_bust02_R"].Stiffness = 0.15f;
-            dictParameterSet["cf_j_bust02_R"].Inert = 0.01f;
-
-            dictParameterSet["cf_j_bust03_R"].BoneName = "cf_j_bust03_R";
-            dictParameterSet["cf_j_bust03_R"].IsRotationCalc = true;
-            dictParameterSet["cf_j_bust03_R"].Damping = 0.99f;
-            dictParameterSet["cf_j_bust03_R"].Elasticity = 0.5f;
-            dictParameterSet["cf_j_bust03_R"].Stiffness = 0.08f;
-            dictParameterSet["cf_j_bust03_R"].Inert = 0.01f;
-
-        }
 
         public bool LoadParamsFromCharacter(BreastDynamicBoneController controller)
         {
@@ -240,12 +199,6 @@ namespace BreastPhysicsController
                         Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "Failed XML Deserialize");
                         return false;
                     }
-
-                    FileStream loadedFS = new FileStream(@".\BepInEx\BreastPhysicsController\Loaded.xml", FileMode.Create, FileAccess.Write);
-                    StreamWriter sw = new StreamWriter(loadedFS, Encoding.UTF8);
-                    parameterXML.Serialize(sw);
-                    sw.Close();
-                    loadedFS.Close();
                     
                     dictParameterSet["cf_j_bust01_L"].CopyParameterFrom(parameterXML.GetParameterSet("Bust01"));
                     dictParameterSet["cf_j_bust02_L"].CopyParameterFrom(parameterXML.GetParameterSet("Bust02"));
@@ -253,6 +206,8 @@ namespace BreastPhysicsController
                     dictParameterSet["cf_j_bust01_R"].CopyParameterFrom(parameterXML.GetParameterSet("Bust01"));
                     dictParameterSet["cf_j_bust02_R"].CopyParameterFrom(parameterXML.GetParameterSet("Bust02"));
                     dictParameterSet["cf_j_bust03_R"].CopyParameterFrom(parameterXML.GetParameterSet("Bust03"));
+
+                    _controller.needUpdate = true;
                 }
             }
             catch(Exception e)
@@ -262,6 +217,62 @@ namespace BreastPhysicsController
             }
             return true;
         }
+
+        public override string ToString()
+        {
+            string value = "";
+            foreach(KeyValuePair<string,ParameterSet> kvp in dictParameterSet)
+            {
+                value += kvp.Value.ToString();
+            }
+            return value;
+        }
+
+        //public void SetDefaultParams()
+        //{
+        //    dictParameterSet["cf_j_bust01_L"].BoneName = "cf_j_bust01_L";
+        //    dictParameterSet["cf_j_bust01_L"].IsRotationCalc = false;
+        //    dictParameterSet["cf_j_bust01_L"].Damping = 0.01f;
+        //    dictParameterSet["cf_j_bust01_L"].Elasticity = 0.8f;
+        //    dictParameterSet["cf_j_bust01_L"].Stiffness = 0.15f;
+        //    dictParameterSet["cf_j_bust01_L"].Inert = 0.2f;
+
+        //    dictParameterSet["cf_j_bust02_L"].BoneName = "cf_j_bust02_L";
+        //    dictParameterSet["cf_j_bust02_L"].IsRotationCalc = true;
+        //    dictParameterSet["cf_j_bust02_L"].Damping = 0.9f;
+        //    dictParameterSet["cf_j_bust02_L"].Elasticity = 0.8f;
+        //    dictParameterSet["cf_j_bust02_L"].Stiffness = 0.15f;
+        //    dictParameterSet["cf_j_bust02_L"].Inert = 0.01f;
+
+        //    dictParameterSet["cf_j_bust03_L"].BoneName = "cf_j_bust03_L";
+        //    dictParameterSet["cf_j_bust03_L"].IsRotationCalc = true;
+        //    dictParameterSet["cf_j_bust03_L"].Damping = 0.99f;
+        //    dictParameterSet["cf_j_bust03_L"].Elasticity = 0.5f;
+        //    dictParameterSet["cf_j_bust03_L"].Stiffness = 0.08f;
+        //    dictParameterSet["cf_j_bust03_L"].Inert = 0.01f;
+
+        //    dictParameterSet["cf_j_bust01_R"].BoneName = "cf_j_bust01_R";
+        //    dictParameterSet["cf_j_bust01_R"].IsRotationCalc = false;
+        //    dictParameterSet["cf_j_bust01_R"].Damping = 0.01f;
+        //    dictParameterSet["cf_j_bust01_R"].Elasticity = 0.8f;
+        //    dictParameterSet["cf_j_bust01_R"].Stiffness = 0.15f;
+        //    dictParameterSet["cf_j_bust01_R"].Inert = 0.2f;
+
+        //    dictParameterSet["cf_j_bust02_R"].BoneName = "cf_j_bust02_R";
+        //    dictParameterSet["cf_j_bust02_R"].IsRotationCalc = true;
+        //    dictParameterSet["cf_j_bust02_R"].Damping = 0.9f;
+        //    dictParameterSet["cf_j_bust02_R"].Elasticity = 0.8f;
+        //    dictParameterSet["cf_j_bust02_R"].Stiffness = 0.15f;
+        //    dictParameterSet["cf_j_bust02_R"].Inert = 0.01f;
+
+        //    dictParameterSet["cf_j_bust03_R"].BoneName = "cf_j_bust03_R";
+        //    dictParameterSet["cf_j_bust03_R"].IsRotationCalc = true;
+        //    dictParameterSet["cf_j_bust03_R"].Damping = 0.99f;
+        //    dictParameterSet["cf_j_bust03_R"].Elasticity = 0.5f;
+        //    dictParameterSet["cf_j_bust03_R"].Stiffness = 0.08f;
+        //    dictParameterSet["cf_j_bust03_R"].Inert = 0.01f;
+
+        //}
 
         [MessagePackObject(keyAsPropertyName: true)]
         public class ParameterSet
@@ -336,7 +347,20 @@ namespace BreastPhysicsController
                 parameter.Stiffness = Stiffness;
                 parameter.Inert = Inert;
             }
+
+            public override string ToString()
+            {
+                string value = "";
+                value += $"BoneName:{BoneName}\r\n";
+                value += $"IsRotationCalc:{IsRotationCalc}\r\n";
+                value += $"Damping:{Damping}\r\n";
+                value += $"Elasiticity:{Elasticity}\r\n";
+                value += $"Stiffness:{Stiffness}\r\n";
+                value += $"Inert:{Inert}\r\n";
+                return value;
+            }
         }
+
 
     }
 

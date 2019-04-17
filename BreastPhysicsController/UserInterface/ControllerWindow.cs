@@ -9,54 +9,68 @@ namespace BreastPhysicsController
 {
     public class ControllerWindow
     {
-        public readonly string windowTitle = "BreastPhysicsController";
-        public int windowID;
-        
+
+        public readonly string _windowTitle = "BreastPhysicsController";
+        public int _windowID;
+        public readonly string _presetDir = @".\BepinEx\BreastPhysicsController\";
 
         //Flags
-        public bool onDisable = false;
-        public bool parameterChanged = false;
-        public bool showWindow = false;
+        public bool _onDisable = false;
+        public bool _parameterChanged = false;
+        public bool _showWindow = false;
 
-        //GUI Component
+        //GUI Component(MainWindow)
         public Rect WindowRect = new Rect(10, 10, 300, 1000);
         public Toggle controllEnable,irc01, irc02, irc03;
-        private SliderAndTextBox damping01, damping02, damping03, elasticity01, elasticity02, elasticity03,
+        public SliderAndTextBox damping01, damping02, damping03, elasticity01, elasticity02, elasticity03,
             stiffness01, stiffness02, stiffness03, inert01, inert02, inert03;
-        public DropDownBox charaSelect;
+        public CharaSelect charaSelect;
+        public PresetSelect presetSelect;
 
-        public ControllerWindow(int windowID)
+        //SaveDialog
+        public int _s_dialogID;
+        public SaveDialog s_dialog;
+        public Rect SDRect = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 50, 300, 100);
+
+        public ControllerWindow(int windowID,int s_dialogID)
         {
-            this.windowID = windowID;
+            _s_dialogID = s_dialogID;
+            _windowID = windowID;
             InitGUI();
         }
 
         private void InitGUI()
         {
 
-            charaSelect = new DropDownBox(ControllerManager.GetAllController().Select(x => x.ChaFileControl.parameter.fullname).ToArray(),
-                ControllerManager.GetAllController().Select(x => x.controllerID).ToArray(), "Character not loaded", WindowRect.width-80, 25,WindowRect.height-50);
+            charaSelect = new CharaSelect(ControllerManager.GetAllController().Select(x => x.ChaFileControl.parameter.fullname).ToArray(),
+                ControllerManager.GetAllController().Select(x => x.controllerID).ToArray(), "Character not loaded", WindowRect.width-20, 25, WindowRect.width - 35, WindowRect.height-50);
 
             controllEnable = new Toggle("Enable controller", false);
 
             irc01 = new Toggle("isRotationCalc", false);
-            damping01 = new SliderAndTextBox("Damping",0,1,200,50);
-            elasticity01 = new SliderAndTextBox("Elasticity", 0, 1, 200, 50);
-            stiffness01 = new SliderAndTextBox("Stiffness", 0, 1, 200, 50);
-            inert01 = new SliderAndTextBox("Inert", 0, 1, 200, 50);
+            damping01 = new SliderAndTextBox("Damping",0,1,200,75);
+            elasticity01 = new SliderAndTextBox("Elasticity", 0, 1, 200, 75);
+            stiffness01 = new SliderAndTextBox("Stiffness", 0, 1, 200, 75);
+            inert01 = new SliderAndTextBox("Inert", 0, 1, 200, 75);
 
             irc02 = new Toggle("isRotationCalc", false);
-            damping02 = new SliderAndTextBox("Damping", 0, 1, 200, 50);
-            elasticity02 = new SliderAndTextBox("Elasticity", 0, 1, 200, 50);
-            stiffness02 = new SliderAndTextBox("Stiffness", 0, 1, 200, 50);
-            inert02 = new SliderAndTextBox("Inert", 0, 1, 200, 50);
+            damping02 = new SliderAndTextBox("Damping", 0, 1, 200, 75);
+            elasticity02 = new SliderAndTextBox("Elasticity", 0, 1, 200, 75);
+            stiffness02 = new SliderAndTextBox("Stiffness", 0, 1, 200, 75);
+            inert02 = new SliderAndTextBox("Inert", 0, 1, 200, 75);
 
             irc03 = new Toggle("isRotationCalc", false);
-            damping03 = new SliderAndTextBox("Damping", 0, 1, 200, 50);
-            elasticity03 = new SliderAndTextBox("Elasticity", 0, 1, 200, 50);
-            stiffness03 = new SliderAndTextBox("Stiffness", 0, 1, 200, 50);
-            inert03 = new SliderAndTextBox("Inert", 0, 1, 200, 50);
+            damping03 = new SliderAndTextBox("Damping", 0, 1, 200, 75);
+            elasticity03 = new SliderAndTextBox("Elasticity", 0, 1, 200, 75);
+            stiffness03 = new SliderAndTextBox("Stiffness", 0, 1, 200, 75);
+            inert03 = new SliderAndTextBox("Inert", 0, 1, 200, 75);
 
+            s_dialog = new SaveDialog(this,_s_dialogID, "Save Preset", SDRect);
+
+            IEnumerable<string> xmls = System.IO.Directory.GetFiles(_presetDir, "*.xml").ToList();
+            xmls = xmls.Select(x => System.IO.Path.GetFileNameWithoutExtension(x));
+            
+            presetSelect=new PresetSelect(_presetDir,"Load preset",137, 20, WindowRect.width - 45,WindowRect.height - 50);
         }
 
         public  void Draw(int windowID)
@@ -65,11 +79,24 @@ namespace BreastPhysicsController
             GUILayout.BeginArea(new Rect(10, 30, WindowRect.width-20, WindowRect.height-60));
 
             //DropDownBox for CharacterSelect
-            charaSelect.Draw();
-            GUILayout.Space(10);
-
-            if(!charaSelect._show)
+            if(charaSelect._show)
             {
+                GUI.skin.label.fontSize = 16;
+                GUILayout.Label("Select a character controlled.");
+                charaSelect.Draw();
+            }
+            else if(presetSelect._show)
+            {
+                GUI.skin.label.fontSize = 16;
+                GUILayout.Label("Select a preset loaded.");
+                presetSelect.Draw();
+            }
+            else
+            {
+                //Chara Select
+                charaSelect.Draw();
+                GUILayout.Space(10);
+
                 //Enable
                 controllEnable.Draw();
                 GUILayout.Space(10);
@@ -111,29 +138,24 @@ namespace BreastPhysicsController
                 GUILayout.Space(10);
 
                 //Button Load from chara
-                if(GUILayout.Button("Load from chara", GUILayout.Width(150)))
+                if(GUILayout.Button("Load from chara"))
                 {
                     BreastDynamicBoneController controller = ControllerManager.GetControllerByID(charaSelect.GetSelectedId());
                     if (controller != null) controller.LoadParamsFromCharacter();
                 }
 
+                GUILayout.BeginHorizontal();
                 //Button Save
-                if (GUILayout.Button("Save", GUILayout.Width(150)))
+                if (GUILayout.Button("Save preset", GUILayout.Width(138)))
                 {
-                    BreastDynamicBoneController controller = ControllerManager.GetControllerByID(charaSelect.GetSelectedId());
-                    if (controller != null) controller.DynamicBoneParameter.SaveFile(@".\BepInEx\BreastPhysicsController\parameter.xml", true);
+                    s_dialog._show = true;
+                    _showWindow = false;
                 }
 
-                //Button Load
-                if (GUILayout.Button("Load", GUILayout.Width(150)))
-                {
-                    BreastDynamicBoneController controller = ControllerManager.GetControllerByID(charaSelect.GetSelectedId());
-                    if (controller != null)
-                    {
-                        controller.DynamicBoneParameter.LoadFile(@".\BepInEx\BreastPhysicsController\parameter.xml");
-                        BreastPhysicsController.w_NeedUpdateValue = true;
-                    }
-                }
+                //Button Load Preset
+                presetSelect.Draw();
+
+                GUILayout.EndHorizontal();
             }
 
 
@@ -195,6 +217,30 @@ namespace BreastPhysicsController
             inert03.SetValue(parameterSet03.Inert);
         }
 
+        public void ResetWindowValue()
+        {
+
+            controllEnable.SetValue(false);
+
+            irc01.SetValue(false);
+            damping01.SetValue(0);
+            elasticity01.SetValue(0);
+            stiffness01.SetValue(0);
+            inert01.SetValue(0);
+
+            irc02.SetValue(false);
+            damping02.SetValue(0);
+            elasticity02.SetValue(0);
+            stiffness02.SetValue(0);
+            inert02.SetValue(0);
+
+            irc03.SetValue(false);
+            damping03.SetValue(0);
+            elasticity03.SetValue(0);
+            stiffness03.SetValue(0);
+            inert03.SetValue(0);
+        }
+
         public void ApplyParameterToController(BreastDynamicBoneController controller)
         {
             controller.enable = controllEnable.GetValue();
@@ -226,12 +272,12 @@ namespace BreastPhysicsController
 
         public bool CheckParameterChanged()
         {
-            parameterChanged = irc01.changed | irc02.changed | irc03.changed |
+            _parameterChanged = irc01.changed | irc02.changed | irc03.changed |
                     damping01.changed | damping02.changed | damping03.changed |
                     elasticity01.changed | elasticity02.changed | elasticity03.changed |
                     stiffness01.changed | stiffness02.changed | stiffness03.changed |
                     inert01.changed | inert02.changed | inert03.changed;
-            return parameterChanged;
+            return _parameterChanged;
         }
 
     }

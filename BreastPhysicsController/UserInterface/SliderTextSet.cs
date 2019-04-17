@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace BreastPhysicsController
 {
-    class SliderAndTextBox
+    public class SliderAndTextBox
     {
         string _text;
         float _sliderWidth;

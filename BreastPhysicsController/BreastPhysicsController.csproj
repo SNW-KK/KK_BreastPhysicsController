@@ -77,8 +77,11 @@
     <Compile Include="BreastDynamicBoneController.cs" />
     <Compile Include="BreastDynamicBoneParameter.cs" />
     <Compile Include="ControllerManager.cs" />
-    <Compile Include="UserInterface\DropDownBox.cs" />
+    <Compile Include="UserInterface\CharaSelect.cs" />
+    <Compile Include="UserInterface\PresetSelect.cs" />
+    <Compile Include="UserInterface\SelectList.cs" />
     <Compile Include="UserInterface\SliderTextSet.cs" />
+    <Compile Include="UserInterface\SaveDialog.cs" />
     <Compile Include="UserInterface\Toggle.cs" />
     <Compile Include="UserInterface\ControllerWindow.cs" />
     <Compile Include="Hooks.cs" />
