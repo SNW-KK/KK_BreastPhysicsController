@@ -15,9 +15,9 @@ namespace BreastPhysicsController
     [BepInPlugin(GUID : GUID , Name : Name, Version : Version)]
     public class BreastPhysicsController : BaseUnityPlugin
     {
-        public const string GUID = "com.snw.bepinex.breastphysicscontoller";
+        public const string GUID = "com.snw.bepinex.breastphysicscontroller";
         public const string Name = "BreastPhysicsController";
-        public const string Version = "1.0";
+        public const string Version = "1.1";
 
         public ControllerWindow window;
         private const int windowID = 1192;
