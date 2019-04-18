@@ -14,8 +14,6 @@ namespace BreastPhysicsController
 
         public static readonly string[] targetBoneNames = { "cf_j_bust01_L", "cf_j_bust02_L", "cf_j_bust03_L", "cf_j_bust01_R", "cf_j_bust02_R", "cf_j_bust03_R" };
 
-        public static readonly string configPath = @".\BepInEx\BreastPhysicsContoller\config.dat";
-
         public BreastDynamicBoneController _controller;
 
         public Dictionary<string, ParameterSet> dictParameterSet = new Dictionary<string, ParameterSet>();

@@ -212,7 +212,7 @@ namespace BreastPhysicsController
 
         public bool LoadParamsFromCharacter()
         {
-            Logger.LogFormatted(LogLevel.Debug, "Call LoadParamsFromCharacter");
+            //Logger.LogFormatted(LogLevel.Debug, "Call LoadParamsFromCharacter");
             if (!haveValidDynamicBoneParam())
             {
                 Logger.LogFormatted(LogLevel.Debug, "LoadParamsFromCharacter:Failed haveValidDynamicBoneParam");

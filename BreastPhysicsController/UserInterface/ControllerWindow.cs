@@ -43,7 +43,7 @@ namespace BreastPhysicsController
         {
 
             charaSelect = new CharaSelect(ControllerManager.GetAllController().Select(x => x.ChaFileControl.parameter.fullname).ToArray(),
-                ControllerManager.GetAllController().Select(x => x.controllerID).ToArray(), "Character not loaded", WindowRect.width-20, 25, WindowRect.width - 35, WindowRect.height-50);
+                ControllerManager.GetAllController().Select(x => x.controllerID).ToArray(), "No character loaded", WindowRect.width-20, 25, WindowRect.width - 35, WindowRect.height-50);
 
             controllEnable = new Toggle("Enable controller", false);
 
@@ -82,13 +82,13 @@ namespace BreastPhysicsController
             if(charaSelect._show)
             {
                 GUI.skin.label.fontSize = 16;
-                GUILayout.Label("Select a character controlled.");
+                GUILayout.Label("Select one character to control.");
                 charaSelect.Draw();
             }
             else if(presetSelect._show)
             {
                 GUI.skin.label.fontSize = 16;
-                GUILayout.Label("Select a preset loaded.");
+                GUILayout.Label("Select one preset to load.");
                 presetSelect.Draw();
             }
             else
@@ -138,7 +138,7 @@ namespace BreastPhysicsController
                 GUILayout.Space(10);
 
                 //Button Load from chara
-                if(GUILayout.Button("Load from chara"))
+                if(GUILayout.Button("Load parameters from chara"))
                 {
                     BreastDynamicBoneController controller = ControllerManager.GetControllerByID(charaSelect.GetSelectedId());
                     if (controller != null) controller.LoadParamsFromCharacter();

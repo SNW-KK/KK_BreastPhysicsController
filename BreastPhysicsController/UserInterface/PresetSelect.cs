@@ -28,7 +28,7 @@ namespace BreastPhysicsController
             IEnumerable<string> xmls = System.IO.Directory.GetFiles(_presetDir, "*.xml").ToList();
             xmls = xmls.Select(x => System.IO.Path.GetFileNameWithoutExtension(x));
             List<string> newList = new List<string>();
-            newList.Add("Cancel load preset.");
+            newList.Add("Cancel loading preset.");
             newList.AddRange(xmls);
             _list = newList.ToArray();
         }

@@ -72,7 +72,7 @@ namespace BreastPhysicsController
             if (window.charaSelect.changed)
             {
                 window.charaSelect.changed = false;
-                Logger.LogFormatted(LogLevel.Debug, "Changed selected character");
+                //Logger.LogFormatted(LogLevel.Debug, "Changed selected character");
                 BreastDynamicBoneController controller = ControllerManager.GetControllerByID(window.charaSelect.GetSelectedId());
                 if (controller != null)
                 {
