@@ -15,17 +15,28 @@ namespace BreastPhysicsController
     {
         public readonly static string GUID = "BreastDynamicBoneController";
         public const string ExtendedDataKey = "BrestDynamicBoneParameter";
-        public bool enable;
+
+        private List<BreastDynamicBoneParameter.ParameterSet> originalL;
+        private List<BreastDynamicBoneParameter.ParameterSet> originalR;
         public BreastDynamicBoneParameter DynamicBoneParameter;
+
+        public bool enable;
         public int controllerID;
-        public bool save;
+        public bool isInitialized;
         public bool onDisable;
         public bool needUpdate;
-        //public bool needInitialLoad;
+
 
         protected override void Update()
         {
-            if(enable && needUpdate)
+            if(!isInitialized && needUpdate)
+            {
+                if (BackupOriginalParameter())
+                {
+                    isInitialized = true;
+                }
+            }
+            if(needUpdate && enable && isInitialized)
             {
                 ApplyBreastDynamicBoneParams();
                 needUpdate = false;
@@ -62,20 +73,20 @@ namespace BreastPhysicsController
 
                 DynamicBoneParameter = new BreastDynamicBoneParameter(this);
                 onDisable = false;
-                save = false;
+                isInitialized = false;
+                originalL = new List<BreastDynamicBoneParameter.ParameterSet>();
+                originalR = new List<BreastDynamicBoneParameter.ParameterSet>();
                 controllerID = this.GetInstanceID();
                 needUpdate = false;
-                //needInitialLoad = true;
                 InitialLoadParameter();
             }
             else //Male
             {
                 DynamicBoneParameter = null;
-                save = false;
+                isInitialized = false;
                 enable = false;
                 onDisable = false;
                 needUpdate = false;
-                //needInitialLoad = false;
             }
         }
 
@@ -182,28 +193,114 @@ namespace BreastPhysicsController
             base.OnDestroy();
         }
 
+        private bool BackupOriginalParameter()
+        {
+
+            DynamicBone_Ver02 breastL = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
+            if (breastL != null)
+            {
+                originalL.Clear();
+                for (int i = 0; i < breastL.Patterns[0].ParticlePtns.Count; i++)
+                {
+                    BreastDynamicBoneParameter.ParameterSet set = new BreastDynamicBoneParameter.ParameterSet();
+                    set.IsRotationCalc = breastL.Patterns[0].ParticlePtns[i].IsRotationCalc;
+                    set.Damping = breastL.Patterns[0].ParticlePtns[i].Damping;
+                    set.Elasticity = breastL.Patterns[0].ParticlePtns[i].Elasticity;
+                    set.Stiffness = breastL.Patterns[0].ParticlePtns[i].Stiffness;
+                    set.Inert = breastL.Patterns[0].ParticlePtns[i].Inert;
+
+                    originalL.Add(set);
+
+                }
+            }
+            else
+            {
+                originalL.Clear();
+                Logger.LogFormatted(LogLevel.Debug, "Failed backup original parameter of BreastL");
+                return false;
+            }
+
+            DynamicBone_Ver02 breastR = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
+            if (breastR != null)
+            {
+                originalR.Clear();
+                for (int i = 0; i < breastR.Patterns[0].ParticlePtns.Count; i++)
+                {
+
+                    BreastDynamicBoneParameter.ParameterSet set = new BreastDynamicBoneParameter.ParameterSet();
+                    set.IsRotationCalc = breastR.Patterns[0].ParticlePtns[i].IsRotationCalc;
+                    set.Damping = breastR.Patterns[0].ParticlePtns[i].Damping;
+                    set.Elasticity = breastR.Patterns[0].ParticlePtns[i].Elasticity;
+                    set.Stiffness = breastR.Patterns[0].ParticlePtns[i].Stiffness;
+                    set.Inert = breastR.Patterns[0].ParticlePtns[i].Inert;
+
+                    originalR.Add(set);
+
+                }
+            }
+            else
+            {
+                originalR.Clear();
+                Logger.LogFormatted(LogLevel.Debug, "Failed backup original paramerter of BreastR");
+                return false;
+            }
+
+            return true;
+        }
+
         private void RestoreOriginalParameter()
         {
             DynamicBone_Ver02 breastL=ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
             if(breastL!=null)
             {
-                breastL.Patterns[0].Params[0].IsRotationCalc = false;
-                breastL.Patterns[0].Params[1].IsRotationCalc = true;
-                breastL.Patterns[0].Params[2].IsRotationCalc = false;
-                breastL.Patterns[0].ParticlePtns[0].IsRotationCalc = false;
-                breastL.Patterns[0].ParticlePtns[1].IsRotationCalc = true;
-                breastL.Patterns[0].ParticlePtns[2].IsRotationCalc = false;
+               
+                if (originalL.Count >= 3)
+                {
+                    //Params
+                    breastL.Patterns[0].Params[0].IsRotationCalc = originalL[0].IsRotationCalc;
+                    breastL.Patterns[0].Params[1].IsRotationCalc = originalL[1].IsRotationCalc;
+                    breastL.Patterns[0].Params[2].IsRotationCalc = originalL[2].IsRotationCalc;
+
+                    breastL.Patterns[0].Params[0].Inert = originalL[0].Inert;
+                    breastL.Patterns[0].Params[1].Inert = originalL[1].Inert;
+                    breastL.Patterns[0].Params[2].Inert = originalL[2].Inert;
+
+                    //Particle Ptns
+                    breastL.Patterns[0].ParticlePtns[0].IsRotationCalc = originalL[0].IsRotationCalc;
+                    breastL.Patterns[0].ParticlePtns[1].IsRotationCalc = originalL[0].IsRotationCalc;
+                    breastL.Patterns[0].ParticlePtns[2].IsRotationCalc = originalL[0].IsRotationCalc;
+
+                    breastL.Patterns[0].ParticlePtns[0].Inert = originalL[0].Inert;
+                    breastL.Patterns[0].ParticlePtns[1].Inert = originalL[1].Inert;
+                    breastL.Patterns[0].ParticlePtns[2].Inert = originalL[2].Inert;
+                }
+                else Logger.LogFormatted(LogLevel.Debug, "Failed restore Inert of breastL. Backuped parameter is invalid");
             }
 
             DynamicBone_Ver02 breastR = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
             if(breastR!=null)
             {
-                breastR.Patterns[0].Params[0].IsRotationCalc = false;
-                breastR.Patterns[0].Params[1].IsRotationCalc = true;
-                breastR.Patterns[0].Params[2].IsRotationCalc = false;
-                breastR.Patterns[0].ParticlePtns[0].IsRotationCalc = false;
-                breastR.Patterns[0].ParticlePtns[1].IsRotationCalc = true;
-                breastR.Patterns[0].ParticlePtns[2].IsRotationCalc = false;
+                if (originalR.Count >= 3)
+                {
+                    //Params
+                    breastR.Patterns[0].Params[0].IsRotationCalc = originalR[0].IsRotationCalc;
+                    breastR.Patterns[0].Params[1].IsRotationCalc = originalR[1].IsRotationCalc;
+                    breastR.Patterns[0].Params[2].IsRotationCalc = originalR[2].IsRotationCalc;
+
+                    breastR.Patterns[0].Params[0].Inert = originalR[0].Inert;
+                    breastR.Patterns[0].Params[1].Inert = originalR[1].Inert;
+                    breastR.Patterns[0].Params[2].Inert = originalR[2].Inert;
+
+                    //Particle Ptns
+                    breastR.Patterns[0].ParticlePtns[0].IsRotationCalc = originalR[0].IsRotationCalc;
+                    breastR.Patterns[0].ParticlePtns[1].IsRotationCalc = originalR[0].IsRotationCalc;
+                    breastR.Patterns[0].ParticlePtns[2].IsRotationCalc = originalR[0].IsRotationCalc;
+
+                    breastR.Patterns[0].ParticlePtns[0].Inert = originalR[0].Inert;
+                    breastR.Patterns[0].ParticlePtns[1].Inert = originalR[1].Inert;
+                    breastR.Patterns[0].ParticlePtns[2].Inert = originalR[2].Inert;
+                }
+                else Logger.LogFormatted(LogLevel.Debug, "Failed restore Inert of breastR. Backuped parameter is invalid");
             }
 
             ChaControl.UpdateBustSoftness();
@@ -228,7 +325,8 @@ namespace BreastPhysicsController
             Logger.LogFormatted(LogLevel.Debug, "LoadParamsFromCharacter:Failed LoadParamsFromCharacter");
             return false;
         }
-            
+        
+
 
         public void ApplyBreastDynamicBoneParams()
         {
