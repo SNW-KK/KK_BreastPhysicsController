@@ -16,13 +16,6 @@ namespace BreastPhysicsController
             ReloadPresetDir();
         }
 
-        //public void SetList(string[] list)
-        //{
-        //    _list = list;
-        //    changed = false;
-        //    _selectedIndex = 0;
-        //}
-
         private void ReloadPresetDir()
         {
             IEnumerable<string> xmls = System.IO.Directory.GetFiles(_presetDir, "*.xml").ToList();
@@ -33,11 +26,8 @@ namespace BreastPhysicsController
             _list = newList.ToArray();
         }
 
-        public bool Draw()
+        public override bool Draw()
         {
-            //changed = false;
-
-            //GUILayout.BeginVertical();
 
             if (_list == null || _list.Length == 0)
             {

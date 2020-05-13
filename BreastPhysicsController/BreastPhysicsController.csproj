@@ -14,6 +14,7 @@
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -34,28 +35,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\ExternalLib\BreastPhysicsController\0Harmony.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\Libs\BreastPhysicsController_BepInEx5\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\ExternalLib\BreastPhysicsController\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\Libs\BreastPhysicsController_BepInEx5\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\ExternalLib\BreastPhysicsController\Assembly-CSharp-firstpass.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\Libs\BreastPhysicsController_BepInEx5\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx">
-      <HintPath>..\..\..\ExternalLib\BreastPhysicsController\BepInEx.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\Libs\BreastPhysicsController_BepInEx5\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Harmony">
+      <HintPath>..\..\..\..\Libs\BreastPhysicsController_BepInEx5\BepInEx.Harmony.dll</HintPath>
     </Reference>
     <Reference Include="ExtensibleSaveFormat">
-      <HintPath>..\..\..\ExternalLib\BreastPhysicsController\ExtensibleSaveFormat.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\Libs\BreastPhysicsController_BepInEx5\ExtensibleSaveFormat.dll</HintPath>
     </Reference>
     <Reference Include="KKAPI">
-      <HintPath>..\..\..\ExternalLib\BreastPhysicsController\KKAPI.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\Libs\BreastPhysicsController_BepInEx5\KKAPI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -64,12 +62,10 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\ExternalLib\BreastPhysicsController\UnityEngine.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\Libs\BreastPhysicsController_BepInEx5\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\ExternalLib\BreastPhysicsController\UnityEngine.UI.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\Libs\BreastPhysicsController_BepInEx5\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -92,7 +88,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /Y "$(TargetDir)BreastPhysicsController.dll" "E:\Illusion\Koikatsu\BepInEx\"</PostBuildEvent>
+    <PostBuildEvent>xcopy /Y "$(TargetDir)BreastPhysicsController.dll" "E:\Illusion\Koikatsu\BepInEx\plugins\"</PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

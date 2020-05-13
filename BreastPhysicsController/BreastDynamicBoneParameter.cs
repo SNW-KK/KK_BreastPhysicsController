@@ -42,8 +42,6 @@ namespace BreastPhysicsController
         public byte[] GetParamByte()
         {
             return LZ4MessagePackSerializer.Serialize(dictParameterSet);
-        
-            //return MessagePackSerializer.Serialize<Dictionary<string, ParameterSet>>(dictParameterSet);
         }
 
         public bool SetParamByte(byte[] byteParams)
@@ -78,7 +76,7 @@ namespace BreastPhysicsController
             {
                 if (!dictParameterSet.ContainsKey(boneName))
                 {
-                    Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "CheckDictParam:dictParameterSet not contain requiered Key");
+                    BreastPhysicsController.Logger.Log(BepInEx.Logging.LogLevel.Warning, "CheckDictParam:dictParameterSet not contain requiered Key");
                     return false;
                 }
             }
@@ -176,8 +174,8 @@ namespace BreastPhysicsController
             catch(Exception e)
             {
 
-                Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "Failed XMLSerialization,Cant save BreastDymamicBoneParameter to XML.");
-                Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, e.ToString());
+                BreastPhysicsController.Logger.Log(BepInEx.Logging.LogLevel.Warning, "Failed XMLSerialization,Cant save BreastDymamicBoneParameter to XML.");
+                BreastPhysicsController.Logger.Log(BepInEx.Logging.LogLevel.Warning, e.ToString());
                 return false;
 
             }
@@ -194,7 +192,7 @@ namespace BreastPhysicsController
                     XMLDynamicBoneParameter parameterXML = new XMLDynamicBoneParameter();
                     if (!parameterXML.Deserialize(sr))
                     {
-                        Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "Failed XML Deserialize");
+                        BreastPhysicsController.Logger.Log(BepInEx.Logging.LogLevel.Warning, "Failed XML Deserialize");
                         return false;
                     }
                     
@@ -205,12 +203,12 @@ namespace BreastPhysicsController
                     dictParameterSet["cf_j_bust02_R"].CopyParameterFrom(parameterXML.GetParameterSet("Bust02"));
                     dictParameterSet["cf_j_bust03_R"].CopyParameterFrom(parameterXML.GetParameterSet("Bust03"));
 
-                    _controller.needUpdate = true;
+                    _controller.needApplyToChara = true;
                 }
             }
             catch(Exception e)
             {
-                Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "Failed load parameter from file.");
+                BreastPhysicsController.Logger.Log(BepInEx.Logging.LogLevel.Warning, "Failed load parameter from file.");
                 return false;
             }
             return true;
@@ -225,52 +223,6 @@ namespace BreastPhysicsController
             }
             return value;
         }
-
-        //public void SetDefaultParams()
-        //{
-        //    dictParameterSet["cf_j_bust01_L"].BoneName = "cf_j_bust01_L";
-        //    dictParameterSet["cf_j_bust01_L"].IsRotationCalc = false;
-        //    dictParameterSet["cf_j_bust01_L"].Damping = 0.01f;
-        //    dictParameterSet["cf_j_bust01_L"].Elasticity = 0.8f;
-        //    dictParameterSet["cf_j_bust01_L"].Stiffness = 0.15f;
-        //    dictParameterSet["cf_j_bust01_L"].Inert = 0.2f;
-
-        //    dictParameterSet["cf_j_bust02_L"].BoneName = "cf_j_bust02_L";
-        //    dictParameterSet["cf_j_bust02_L"].IsRotationCalc = true;
-        //    dictParameterSet["cf_j_bust02_L"].Damping = 0.9f;
-        //    dictParameterSet["cf_j_bust02_L"].Elasticity = 0.8f;
-        //    dictParameterSet["cf_j_bust02_L"].Stiffness = 0.15f;
-        //    dictParameterSet["cf_j_bust02_L"].Inert = 0.01f;
-
-        //    dictParameterSet["cf_j_bust03_L"].BoneName = "cf_j_bust03_L";
-        //    dictParameterSet["cf_j_bust03_L"].IsRotationCalc = true;
-        //    dictParameterSet["cf_j_bust03_L"].Damping = 0.99f;
-        //    dictParameterSet["cf_j_bust03_L"].Elasticity = 0.5f;
-        //    dictParameterSet["cf_j_bust03_L"].Stiffness = 0.08f;
-        //    dictParameterSet["cf_j_bust03_L"].Inert = 0.01f;
-
-        //    dictParameterSet["cf_j_bust01_R"].BoneName = "cf_j_bust01_R";
-        //    dictParameterSet["cf_j_bust01_R"].IsRotationCalc = false;
-        //    dictParameterSet["cf_j_bust01_R"].Damping = 0.01f;
-        //    dictParameterSet["cf_j_bust01_R"].Elasticity = 0.8f;
-        //    dictParameterSet["cf_j_bust01_R"].Stiffness = 0.15f;
-        //    dictParameterSet["cf_j_bust01_R"].Inert = 0.2f;
-
-        //    dictParameterSet["cf_j_bust02_R"].BoneName = "cf_j_bust02_R";
-        //    dictParameterSet["cf_j_bust02_R"].IsRotationCalc = true;
-        //    dictParameterSet["cf_j_bust02_R"].Damping = 0.9f;
-        //    dictParameterSet["cf_j_bust02_R"].Elasticity = 0.8f;
-        //    dictParameterSet["cf_j_bust02_R"].Stiffness = 0.15f;
-        //    dictParameterSet["cf_j_bust02_R"].Inert = 0.01f;
-
-        //    dictParameterSet["cf_j_bust03_R"].BoneName = "cf_j_bust03_R";
-        //    dictParameterSet["cf_j_bust03_R"].IsRotationCalc = true;
-        //    dictParameterSet["cf_j_bust03_R"].Damping = 0.99f;
-        //    dictParameterSet["cf_j_bust03_R"].Elasticity = 0.5f;
-        //    dictParameterSet["cf_j_bust03_R"].Stiffness = 0.08f;
-        //    dictParameterSet["cf_j_bust03_R"].Inert = 0.01f;
-
-        //}
 
         [MessagePackObject(keyAsPropertyName: true)]
         public class ParameterSet
@@ -295,7 +247,7 @@ namespace BreastPhysicsController
                 }
                 catch (Exception e)
                 {
-                    Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "Failed copy DynamicBoneParam.");
+                    BreastPhysicsController.Logger.Log(BepInEx.Logging.LogLevel.Warning, "Failed copy DynamicBoneParam.");
                     return false;
                 }
             }
@@ -312,7 +264,7 @@ namespace BreastPhysicsController
                 }
                 catch (Exception e)
                 {
-                    Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "Failed copy DynamicBoneParam.");
+                    BreastPhysicsController.Logger.Log(BepInEx.Logging.LogLevel.Warning, "Failed copy DynamicBoneParam.");
                     return false;
                 }
                 return true;
@@ -331,7 +283,7 @@ namespace BreastPhysicsController
                 }
                 catch (Exception e)
                 {
-                    Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "Failed copy DynamicBoneParam.");
+                    BreastPhysicsController.Logger.Log(BepInEx.Logging.LogLevel.Warning, "Failed copy DynamicBoneParam.");
                     return false;
                 }
                 return true;

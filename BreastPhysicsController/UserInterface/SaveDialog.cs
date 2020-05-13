@@ -12,7 +12,7 @@ namespace BreastPhysicsController
         public ControllerWindow _parent;
         public string _windowTitle;
         public int _windowID;
-        private string _saveDir = @".\BepInEx\BreastPhysicsController\";
+        private string _saveDir = @".\BepInEx\plugins\BreastPhysicsController\";
 
         public string _fileName;
 
@@ -109,9 +109,6 @@ namespace BreastPhysicsController
                 parameterXML.Serialize(sw);
             }
                 
-            //string savePath = Path.Combine(_saveDir, filename) + ".xml";
-            //BreastDynamicBoneController controller = ControllerManager.GetControllerByID(_parent.charaSelect.GetSelectedId());
-            //if (controller != null) controller.DynamicBoneParameter.SaveFile(@".\BepInEx\BreastPhysicsController\parameter.xml", true);
         }
     }
 }

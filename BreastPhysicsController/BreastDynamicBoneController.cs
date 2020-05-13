@@ -16,40 +16,142 @@ namespace BreastPhysicsController
         public readonly static string GUID = "BreastDynamicBoneController";
         public const string ExtendedDataKey = "BrestDynamicBoneParameter";
 
-        private List<BreastDynamicBoneParameter.ParameterSet> originalL;
-        private List<BreastDynamicBoneParameter.ParameterSet> originalR;
+        private List<BreastDynamicBoneParameter.ParameterSet> orgParamL, orgParticlePtnL, orgParamR, orgParticlePtnR;
         public BreastDynamicBoneParameter DynamicBoneParameter;
 
-        public bool enable;
         public int controllerID;
-        public bool isInitialized;
-        public bool onDisable;
-        public bool needUpdate;
 
+        public bool enable;
 
-        protected override void Update()
+        public bool needBackup;
+        public bool needRestore;
+        public bool needApplyToChara;
+
+        public bool haveBackup;
+        public bool charaHaveOrgParam;
+
+        private void LateUpdate()
         {
-            if(!isInitialized && needUpdate)
+            //Backup
+            if(needBackup && charaHaveOrgParam)
             {
-                if (BackupOriginalParameter())
-                {
-                    isInitialized = true;
-                }
+                BackupOriginalParameter();
             }
-            if(needUpdate && enable && isInitialized)
+            //Apply
+            if(needApplyToChara && haveBackup)
             {
                 ApplyBreastDynamicBoneParams();
-                needUpdate = false;
             }
-            else if(onDisable)
+            //Restore
+            if(needRestore && haveBackup)
             {
-                enable = false;
-                onDisable = false;
-                OnDisable();
+                RestoreOriginalParameter();
             }
-            base.Update();
         }
 
+        protected override void OnReload(GameMode currentGameMode)
+        {
+#if DEBUG
+            BreastPhysicsController.Logger.LogDebug("Call OnReload");
+#endif
+
+            if (ChaControl.sex == 1) //Female
+            {
+                //test中
+                enable = false;
+                needBackup = false;
+                needRestore = false;
+                needApplyToChara = false;
+                haveBackup = false;
+                charaHaveOrgParam = true;
+
+                //以下必須
+                BreastPhysicsController.w_NeedUpdateCharaList = true;
+
+                DynamicBoneParameter = new BreastDynamicBoneParameter(this);
+                orgParamL = new List<BreastDynamicBoneParameter.ParameterSet>();
+                orgParticlePtnL = new List<BreastDynamicBoneParameter.ParameterSet>();
+                orgParamR = new List<BreastDynamicBoneParameter.ParameterSet>();
+                orgParticlePtnR = new List<BreastDynamicBoneParameter.ParameterSet>();
+                controllerID = this.GetInstanceID();
+
+                LoadExtendedData();
+            }
+            else //Male
+            {
+                DynamicBoneParameter = null;
+            }
+        }
+
+        public void OnEnableController()
+        {
+#if DEBUG
+            BreastPhysicsController.Logger.LogDebug("Call OnEnableController");
+#endif
+            enable = true;
+            if (!haveBackup && charaHaveOrgParam) needBackup = true;
+            needApplyToChara = true;
+
+        }
+
+        public void OnBustSoftRecalc()
+        {
+#if DEBUG
+            BreastPhysicsController.Logger.LogDebug("Call OnBustSoftRecalc");
+#endif
+            if (!enable) return;
+
+            if (!haveBackup && charaHaveOrgParam) needBackup = true;
+            needApplyToChara = true;
+        }
+
+        public void OnWindowValueChanged(ControllerWindow window)
+        {
+#if DEBUG
+            BreastPhysicsController.Logger.LogDebug("Call OnWindowValueChanged");
+#endif
+            //enable = window.controllEnable.GetValue();
+
+            DynamicBoneParameter.dictParameterSet["cf_j_bust01_L"].IsRotationCalc = window.irc01.GetValue();
+            DynamicBoneParameter.dictParameterSet["cf_j_bust01_L"].Damping = window.damping01.GetValue();
+            DynamicBoneParameter.dictParameterSet["cf_j_bust01_L"].Elasticity = window.elasticity01.GetValue();
+            DynamicBoneParameter.dictParameterSet["cf_j_bust01_L"].Stiffness = window.stiffness01.GetValue();
+            DynamicBoneParameter.dictParameterSet["cf_j_bust01_L"].Inert = window.inert01.GetValue();
+
+            DynamicBoneParameter.dictParameterSet["cf_j_bust02_L"].IsRotationCalc = window.irc02.GetValue();
+            DynamicBoneParameter.dictParameterSet["cf_j_bust02_L"].Damping = window.damping02.GetValue();
+            DynamicBoneParameter.dictParameterSet["cf_j_bust02_L"].Elasticity = window.elasticity02.GetValue();
+            DynamicBoneParameter.dictParameterSet["cf_j_bust02_L"].Stiffness = window.stiffness02.GetValue();
+            DynamicBoneParameter.dictParameterSet["cf_j_bust02_L"].Inert = window.inert02.GetValue();
+
+            DynamicBoneParameter.dictParameterSet["cf_j_bust03_L"].IsRotationCalc = window.irc03.GetValue();
+            DynamicBoneParameter.dictParameterSet["cf_j_bust03_L"].Damping = window.damping03.GetValue();
+            DynamicBoneParameter.dictParameterSet["cf_j_bust03_L"].Elasticity = window.elasticity03.GetValue();
+            DynamicBoneParameter.dictParameterSet["cf_j_bust03_L"].Stiffness = window.stiffness03.GetValue();
+            DynamicBoneParameter.dictParameterSet["cf_j_bust03_L"].Inert = window.inert03.GetValue();
+
+            DynamicBoneParameter.dictParameterSet["cf_j_bust01_R"].CopyParameterFrom(DynamicBoneParameter.dictParameterSet["cf_j_bust01_L"]);
+            DynamicBoneParameter.dictParameterSet["cf_j_bust02_R"].CopyParameterFrom(DynamicBoneParameter.dictParameterSet["cf_j_bust02_L"]);
+            DynamicBoneParameter.dictParameterSet["cf_j_bust03_R"].CopyParameterFrom(DynamicBoneParameter.dictParameterSet["cf_j_bust03_L"]);
+
+
+            if (!enable)
+            {   
+                return;
+            }
+
+            if (!haveBackup && charaHaveOrgParam) needBackup = true;
+            needApplyToChara = true;
+        }
+
+        public void OnDisableController()
+        {
+#if DEBUG
+            BreastPhysicsController.Logger.LogDebug("Call OnDisableController");
+#endif
+            enable = false;
+            if (haveBackup) needRestore = true;
+        }
 
         protected override void OnCardBeingSaved(GameMode currentGameMode)
         {
@@ -64,35 +166,14 @@ namespace BreastPhysicsController
 
         }
 
-        protected override void OnReload(GameMode currentGameMode)
+        protected override void OnDestroy()
         {
-            enable = false;
-            if (ChaControl.sex == 1) //Female
-            {
-                BreastPhysicsController.w_NeedUpdateCharaList = true;
-
-                DynamicBoneParameter = new BreastDynamicBoneParameter(this);
-                onDisable = false;
-                isInitialized = false;
-                originalL = new List<BreastDynamicBoneParameter.ParameterSet>();
-                originalR = new List<BreastDynamicBoneParameter.ParameterSet>();
-                controllerID = this.GetInstanceID();
-                needUpdate = false;
-                InitialLoadParameter();
-            }
-            else //Male
-            {
-                DynamicBoneParameter = null;
-                isInitialized = false;
-                enable = false;
-                onDisable = false;
-                needUpdate = false;
-            }
+            BreastPhysicsController.w_NeedUpdateCharaList = true;
+            base.OnDestroy();
         }
 
-        public void InitialLoadParameter()
+        private void LoadExtendedData()
         {
-            //needInitialLoad = false;
 
             var data = GetExtendedData();
             var byteDBParams = new object();
@@ -103,103 +184,60 @@ namespace BreastPhysicsController
                     var cardEnable = new object();
                     if (data.data.TryGetValue("Enable", out cardEnable) && cardEnable is bool)
                     {
-                        Logger.LogFormatted(LogLevel.Debug, "DynamicBoneParameter was loaded from ExtendedData.");
-                        enable = (bool)cardEnable;
-                        needUpdate = true;
-                        //Logger.LogFormatted(LogLevel.Debug, DynamicBoneParameter.ToString());
+#if DEBUG
+                        BreastPhysicsController.Logger.LogDebug("Read parameters from ExtendedData\r\n"+DynamicBoneParameter.ToString());
+#endif
+                        if ((bool)cardEnable)
+                        {
+                            BreastPhysicsController.Logger.Log(LogLevel.Info, "Loaded parameters from ExtendedData(Character Card).");
+                            enable = true;
+                            needBackup = true;
+                            needApplyToChara = true;
+                        }
+                        else
+                        {
+                            BreastPhysicsController.Logger.Log(LogLevel.Info, "Loaded parameters from ExtendedData. but BrestDynamicBoneController is disabled.");
+                            return;
+                        }
                     }
                     else
                     {
-                        enable = false;
-                        Logger.LogFormatted(LogLevel.Debug, "DynamicBoneParameter readed,but controller is disabled.");
+                        BreastPhysicsController.Logger.Log(LogLevel.Info, "Loaded parameters from ExtendedData is invalid. BrestDynamicBoneController is disabled.");
                     }
-                    //ApplyBreastDynamicBoneParams();
                 }
                 else
                 {
-                    //DynamicBoneParameter.LoadParamsFromCharacter(ChaControl);
-                    Logger.LogFormatted(LogLevel.Debug, "Loaded parameters from ExtendedData is invalid. BrestDynamicBoneController is disabled.");
+                    BreastPhysicsController.Logger.Log(LogLevel.Warning, "Loaded parameters from ExtendedData is invalid. BrestDynamicBoneController is disabled.");
                 }
             }
             else
             {
-                Logger.LogFormatted(LogLevel.Debug, "DynamicBoneParameter is not saved in card.");
-                //DynamicBoneParameter.LoadParamsFromCharacter(this);
+                BreastPhysicsController.Logger.Log(LogLevel.Info, "DynamicBoneParameter is not saved in card.");
             }
-        }
-
-        //protected override void OnReload(GameMode currentGameMode)
-        //{
-        //    enable = false;
-        //    if (ChaControl.sex == 1) //Female
-        //    {
-        //        BreastPhysicsController.w_NeedUpdateCharaList = true;
-
-        //        DynamicBoneParameter = new BreastDynamicBoneParameter(this);
-        //        onDisable = false;
-        //        save = false;
-        //        controllerID = this.GetInstanceID();
-        //        needUpdate = true;
-
-        //        var data = GetExtendedData();
-        //        var byteDBParams = new object();
-        //        if (data != null && data.data.TryGetValue(ExtendedDataKey, out byteDBParams) && byteDBParams is byte[])
-        //        {
-        //            if (DynamicBoneParameter.SetParamByte((byte[])byteDBParams))
-        //            {
-        //                var cardEnable = new object();
-        //                if (data.data.TryGetValue("Enable", out cardEnable) && cardEnable is bool)
-        //                {
-        //                    Logger.LogFormatted(LogLevel.Debug, "DynamicBoneParameter was loaded from ExtendedData.");
-        //                    enable = (bool)cardEnable;
-        //                }
-        //                else
-        //                {
-        //                    Logger.LogFormatted(LogLevel.Debug, "DynamicBoneParameter readed,but controller is disabled.");
-        //                }
-        //            }
-        //            else
-        //            {
-        //                DynamicBoneParameter.LoadParamsFromCharacter(ChaControl);
-        //                Logger.LogFormatted(LogLevel.Debug, "Loaded parameters from ExtendedData is invalid. BrestDynamicBoneController is disabled.");
-        //            }
-        //        }
-        //        else
-        //        {
-        //            Logger.LogFormatted(LogLevel.Debug, "DynamicBoneParameter is not saved in card.");
-        //            //DynamicBoneParameter.LoadParamsFromCharacter(this);
-        //            LoadParamsFromCharacter();
-        //        }
-        //    }
-        //    else //Male
-        //    {
-        //        DynamicBoneParameter = null;
-        //        save = false;
-        //        needUpdate = false;
-        //    }
-        //}
-
-
-
-        private void OnDisable()
-        {
-            RestoreOriginalParameter();
-        }
-
-        protected override void OnDestroy()
-        {
-            BreastPhysicsController.w_NeedUpdateCharaList = true;
-
-            base.OnDestroy();
         }
 
         private bool BackupOriginalParameter()
         {
-
+#if DEBUG
+            BreastPhysicsController.Logger.LogDebug("Call BackupOriginalParameter");
+#endif
             DynamicBone_Ver02 breastL = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
             if (breastL != null)
             {
-                originalL.Clear();
+                orgParamL.Clear();
+                for (int i = 0; i < breastL.Patterns[0].Params.Count; i++)
+                {
+                    BreastDynamicBoneParameter.ParameterSet set = new BreastDynamicBoneParameter.ParameterSet();
+                    set.IsRotationCalc = breastL.Patterns[0].Params[i].IsRotationCalc;
+                    set.Damping = breastL.Patterns[0].Params[i].Damping;
+                    set.Elasticity = breastL.Patterns[0].Params[i].Elasticity;
+                    set.Stiffness = breastL.Patterns[0].Params[i].Stiffness;
+                    set.Inert = breastL.Patterns[0].Params[i].Inert;
+
+                    orgParamL.Add(set);
+                }
+
+                orgParticlePtnL.Clear();
                 for (int i = 0; i < breastL.Patterns[0].ParticlePtns.Count; i++)
                 {
                     BreastDynamicBoneParameter.ParameterSet set = new BreastDynamicBoneParameter.ParameterSet();
@@ -209,21 +247,34 @@ namespace BreastPhysicsController
                     set.Stiffness = breastL.Patterns[0].ParticlePtns[i].Stiffness;
                     set.Inert = breastL.Patterns[0].ParticlePtns[i].Inert;
 
-                    originalL.Add(set);
-
+                    orgParticlePtnL.Add(set);
                 }
+
             }
             else
             {
-                originalL.Clear();
-                Logger.LogFormatted(LogLevel.Debug, "Failed backup original parameter of BreastL");
+                BreastPhysicsController.Logger.Log(LogLevel.Warning, "Failed backup original Params and ParticlePtns of BreastL");
                 return false;
             }
 
             DynamicBone_Ver02 breastR = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
             if (breastR != null)
             {
-                originalR.Clear();
+                orgParamR.Clear();
+                for (int i = 0; i < breastR.Patterns[0].Params.Count; i++)
+                {
+
+                    BreastDynamicBoneParameter.ParameterSet set = new BreastDynamicBoneParameter.ParameterSet();
+                    set.IsRotationCalc = breastR.Patterns[0].Params[i].IsRotationCalc;
+                    set.Damping = breastR.Patterns[0].Params[i].Damping;
+                    set.Elasticity = breastR.Patterns[0].Params[i].Elasticity;
+                    set.Stiffness = breastR.Patterns[0].Params[i].Stiffness;
+                    set.Inert = breastR.Patterns[0].Params[i].Inert;
+
+                    orgParamR.Add(set);
+                }
+
+                orgParticlePtnR.Clear();
                 for (int i = 0; i < breastR.Patterns[0].ParticlePtns.Count; i++)
                 {
 
@@ -234,22 +285,131 @@ namespace BreastPhysicsController
                     set.Stiffness = breastR.Patterns[0].ParticlePtns[i].Stiffness;
                     set.Inert = breastR.Patterns[0].ParticlePtns[i].Inert;
 
-                    originalR.Add(set);
-
+                    orgParticlePtnR.Add(set);
                 }
             }
             else
             {
-                originalR.Clear();
-                Logger.LogFormatted(LogLevel.Debug, "Failed backup original paramerter of BreastR");
+                BreastPhysicsController.Logger.Log(LogLevel.Warning, "Failed backup original Params and ParticlePtns of BreastR");
                 return false;
             }
+#if DEBUG
+            BreastPhysicsController.Logger.LogDebug("Backuped Bust L Params");
+            foreach (BreastDynamicBoneParameter.ParameterSet set in orgParamL)
+            {
+                BreastPhysicsController.Logger.LogDebug("\r\n"+set.ToString());
+            }
+
+            BreastPhysicsController.Logger.LogDebug("Backuped Bust R Params");
+            foreach (BreastDynamicBoneParameter.ParameterSet set in orgParamR)
+            {
+                BreastPhysicsController.Logger.LogDebug("\r\n" + set.ToString());
+            }
+
+            BreastPhysicsController.Logger.LogDebug("Backuped Bust L ParticlePtns");
+            foreach (BreastDynamicBoneParameter.ParameterSet set in orgParticlePtnL)
+            {
+                BreastPhysicsController.Logger.LogDebug("\r\n" + set.ToString());
+            }
+
+            BreastPhysicsController.Logger.LogDebug("Backuped Bust R ParticlePtns");
+            foreach (BreastDynamicBoneParameter.ParameterSet set in orgParticlePtnR)
+            {
+                BreastPhysicsController.Logger.LogDebug("\r\n" + set.ToString());
+            }
+#endif
+
+            haveBackup = true;
+            needBackup = false;
+            return true;
+        }
+
+        private bool ApplyBreastDynamicBoneParams()
+        {
+#if DEBUG
+            BreastPhysicsController.Logger.LogDebug("Call ApplyBreastDynamicBoneParams");
+#endif
+            DynamicBone_Ver02 breastL = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
+            if (breastL != null)
+            {
+#if DEBUG
+                BreastPhysicsController.Logger.LogDebug("ApplyBreastDynamicBoneParams to BrestL");
+#endif
+                if (!ApplyBreastDynamicBoneParams(breastL)) return false;
+            }
+            else return false;
+
+            DynamicBone_Ver02 breastR = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
+            if (breastR != null)
+            {
+#if DEBUG
+                BreastPhysicsController.Logger.LogDebug("ApplyBreastDynamicBoneParams to BrestR");
+#endif
+                if (!ApplyBreastDynamicBoneParams(breastR)) return false;
+            }
+            else return false;
+
+            breastL.ResetPosition();
+            breastR.ResetPosition();
+            charaHaveOrgParam = false;
+            needApplyToChara = false;
+            return true;
+        }
+
+        private void ApplyBreastDynamicBoneParams(ChaControl chaControl)
+        {
+
+            DynamicBone_Ver02 breastL = chaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
+            if (breastL != null)
+            {
+                ApplyBreastDynamicBoneParams(breastL);
+            }
+
+            DynamicBone_Ver02 breastR = chaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
+            if (breastR != null)
+            {
+                ApplyBreastDynamicBoneParams(breastR);
+            }
+
+            chaControl.reSetupDynamicBoneBust = true;
+        }
+
+        private bool ApplyBreastDynamicBoneParams(DynamicBone_Ver02 targetDynamicBone)
+        {
+
+            //For Params
+            //Parameter Patterns[0]="通常"
+            for (int i = 0; i < targetDynamicBone.Patterns[0].Params.Count; i++)
+            {
+                string boneName = targetDynamicBone.Patterns[0].Params[i].Name;
+                if (BreastDynamicBoneParameter.targetBoneNames.Contains(boneName))
+                {
+                    BreastDynamicBoneParameter.ParameterSet parameterSet = DynamicBoneParameter.GetParameterSet(boneName);
+                    if (parameterSet != null)
+                    {
+                        parameterSet.CopyParameterTo(targetDynamicBone.Patterns[0].Params[i]);
+                    }
+                    else return false;
+
+                }
+            }
+
+            //For ParticlePtn
+            //ParticlePtn Patterns[0]="通常"
+            CopyParamsToParticlePtn(targetDynamicBone);
+
+            //For Particle. Must set at last.
+            targetDynamicBone.setPtn(0, true);
 
             return true;
         }
 
         private void RestoreOriginalParameter()
         {
+#if DEBUG
+            BreastPhysicsController.Logger.LogDebug("Call RestoreOriginalParameter");
+#endif
+            /*
             DynamicBone_Ver02 breastL=ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
             if(breastL!=null)
             {
@@ -267,14 +427,16 @@ namespace BreastPhysicsController
 
                     //Particle Ptns
                     breastL.Patterns[0].ParticlePtns[0].IsRotationCalc = originalL[0].IsRotationCalc;
-                    breastL.Patterns[0].ParticlePtns[1].IsRotationCalc = originalL[0].IsRotationCalc;
-                    breastL.Patterns[0].ParticlePtns[2].IsRotationCalc = originalL[0].IsRotationCalc;
+                    breastL.Patterns[0].ParticlePtns[1].IsRotationCalc = originalL[1].IsRotationCalc;
+                    breastL.Patterns[0].ParticlePtns[2].IsRotationCalc = originalL[2].IsRotationCalc;
 
                     breastL.Patterns[0].ParticlePtns[0].Inert = originalL[0].Inert;
                     breastL.Patterns[0].ParticlePtns[1].Inert = originalL[1].Inert;
                     breastL.Patterns[0].ParticlePtns[2].Inert = originalL[2].Inert;
+
+                    breastL.setPtn(0, true);
                 }
-                else Logger.LogFormatted(LogLevel.Debug, "Failed restore Inert of breastL. Backuped parameter is invalid");
+                else BreastPhysicsController.Logger.Log(LogLevel.Warning, "Failed restore original dynamic bone parameters of breastL. Backuped parameter is invalid");
             }
 
             DynamicBone_Ver02 breastR = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
@@ -293,105 +455,88 @@ namespace BreastPhysicsController
 
                     //Particle Ptns
                     breastR.Patterns[0].ParticlePtns[0].IsRotationCalc = originalR[0].IsRotationCalc;
-                    breastR.Patterns[0].ParticlePtns[1].IsRotationCalc = originalR[0].IsRotationCalc;
-                    breastR.Patterns[0].ParticlePtns[2].IsRotationCalc = originalR[0].IsRotationCalc;
+                    breastR.Patterns[0].ParticlePtns[1].IsRotationCalc = originalR[1].IsRotationCalc;
+                    breastR.Patterns[0].ParticlePtns[2].IsRotationCalc = originalR[2].IsRotationCalc;
 
                     breastR.Patterns[0].ParticlePtns[0].Inert = originalR[0].Inert;
                     breastR.Patterns[0].ParticlePtns[1].Inert = originalR[1].Inert;
                     breastR.Patterns[0].ParticlePtns[2].Inert = originalR[2].Inert;
+
+                    breastR.setPtn(0, true);
                 }
-                else Logger.LogFormatted(LogLevel.Debug, "Failed restore Inert of breastR. Backuped parameter is invalid");
+                else BreastPhysicsController.Logger.Log(LogLevel.Warning, "Failed restore original dynamic bone parameters of breastR. Backuped parameter is invalid");
             }
+            */
 
-            ChaControl.UpdateBustSoftness();
-            ChaControl.reSetupDynamicBoneBust = true;
-        }
-
-        public bool LoadParamsFromCharacter()
-        {
-            //Logger.LogFormatted(LogLevel.Debug, "Call LoadParamsFromCharacter");
-            if (!haveValidDynamicBoneParam())
-            {
-                Logger.LogFormatted(LogLevel.Debug, "LoadParamsFromCharacter:Failed haveValidDynamicBoneParam");
-                return false;
-            }
-            bool success= DynamicBoneParameter.LoadParamsFromCharacter(this);
-            if(success)
-            {
-                Logger.LogFormatted(LogLevel.Debug, "LoadParamsFromCharacter:Success LoadParamsFromCharacter");
-                BreastPhysicsController.w_NeedUpdateValue = true;
-                return true;
-            }
-            Logger.LogFormatted(LogLevel.Debug, "LoadParamsFromCharacter:Failed LoadParamsFromCharacter");
-            return false;
-        }
-        
-
-
-        public void ApplyBreastDynamicBoneParams()
-        {
-            
             DynamicBone_Ver02 breastL = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
-            if (breastL != null)
+            if(breastL!=null)
             {
-                //Logger.LogFormatted(LogLevel.Debug, "ApplyBreastDynamicBoneParams to BrestL");
-                ApplyBreastDynamicBoneParams(breastL);
+                for (int i = 0; i < orgParamL.Count; i++)
+                { 
+                    breastL.Patterns[0].Params[i].IsRotationCalc = orgParamL[i].IsRotationCalc;
+                    breastL.Patterns[0].Params[i].Inert = orgParamL[i].Inert;
+                }
+                orgParamL.Clear();
+
+                for (int i = 0; i < orgParticlePtnL.Count; i++)
+                {
+                    breastL.Patterns[0].ParticlePtns[i].IsRotationCalc = orgParticlePtnL[i].IsRotationCalc;
+                    breastL.Patterns[0].ParticlePtns[i].Inert = orgParticlePtnL[i].Inert;
+                }
+                orgParticlePtnL.Clear();
+
+                breastL.setPtn(0, true);
             }
 
             DynamicBone_Ver02 breastR = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
             if (breastR != null)
             {
-                //Logger.LogFormatted(LogLevel.Debug, "ApplyBreastDynamicBoneParams to BrestR");
-                ApplyBreastDynamicBoneParams(breastR);
-            }
-
-            //ChaControl.reSetupDynamicBoneBust = true;
-        }
-
-        public void ApplyBreastDynamicBoneParams(ChaControl chaControl)
-        {
-
-            DynamicBone_Ver02 breastL = chaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
-            if (breastL != null)
-            {
-                ApplyBreastDynamicBoneParams(breastL);
-            }
-
-            DynamicBone_Ver02 breastR = chaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastR);
-            if (breastR != null)
-            {
-                ApplyBreastDynamicBoneParams(breastR);
-            }
-
-            chaControl.reSetupDynamicBoneBust = true;
-        }
-
-
-        public void ApplyBreastDynamicBoneParams(DynamicBone_Ver02 targetDynamicBone)
-        {
-            //For Params
-            //Parameter Patterns[0]="通常"
-            for (int i = 0; i < targetDynamicBone.Patterns[0].Params.Count; i++)
-            {
-                string boneName = targetDynamicBone.Patterns[0].Params[i].Name;
-                if (BreastDynamicBoneParameter.targetBoneNames.Contains(boneName))
+                for (int i = 0; i < orgParamR.Count; i++)
                 {
-                    BreastDynamicBoneParameter.ParameterSet parameterSet = DynamicBoneParameter.GetParameterSet(boneName);
-                    if(parameterSet!=null)
-                    {
-                        parameterSet.CopyParameterTo(targetDynamicBone.Patterns[0].Params[i]);
-                    }
-                        
+                    breastR.Patterns[0].Params[i].IsRotationCalc = orgParamR[i].IsRotationCalc;
+                    breastR.Patterns[0].Params[i].Inert = orgParamR[i].Inert;
                 }
+                orgParamR.Clear();
+
+                for (int i = 0; i < orgParticlePtnR.Count; i++)
+                {
+                    breastR.Patterns[0].ParticlePtns[i].IsRotationCalc = orgParticlePtnR[i].IsRotationCalc;
+                    breastR.Patterns[0].ParticlePtns[i].Inert = orgParticlePtnR[i].Inert;
+                }
+                orgParticlePtnR.Clear();
+
+                breastR.setPtn(0, true);
             }
-            //For ParticlePtn
-            //ParticlePtn Patterns[0]="通常"
-            CopyParamsToParticlePtn(targetDynamicBone);
 
-            //For Particle. Must set at last.
-            targetDynamicBone.setPtn(0, true);
+            charaHaveOrgParam = true;
+            haveBackup = false;
+            needRestore = false;
+
+            ChaControl.reSetupDynamicBoneBust = true;
         }
+        
+        public bool LoadParamsFromGame()
+        {
 
+#if DEBUG
+            BreastPhysicsController.Logger.Log(LogLevel.Debug, "Call LoadParamsFromGame");
+#endif
+
+            if (!haveValidDynamicBoneParam())
+            {
+                BreastPhysicsController.Logger.Log(LogLevel.Error, "LoadParamsFromCharacter:Failed haveValidDynamicBoneParam");
+                return false;
+            }
+            bool success= DynamicBoneParameter.LoadParamsFromCharacter(this);
+            if(success)
+            {
+                BreastPhysicsController.Logger.Log(LogLevel.Info, "LoadParamsFromCharacter:Success LoadParamsFromCharacter");
+                BreastPhysicsController.w_NeedUpdateValue = true;
+                return true;
+            }
+            BreastPhysicsController.Logger.Log(LogLevel.Error, "LoadParamsFromCharacter:Failed LoadParamsFromCharacter");
+            return false;
+        }
 
         private void CopyParamsToParticlePtn(DynamicBone_Ver02 target)
         {
@@ -428,5 +573,6 @@ namespace BreastPhysicsController
 
             return false;
         }
+
     }
 }

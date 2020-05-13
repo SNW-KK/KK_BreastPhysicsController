@@ -12,7 +12,6 @@ namespace BreastPhysicsController
 
         public readonly string _windowTitle = "BreastPhysicsController";
         public int _windowID;
-        public readonly string _presetDir = @".\BepinEx\BreastPhysicsController\";
 
         //Flags
         public bool _onDisable = false;
@@ -20,7 +19,7 @@ namespace BreastPhysicsController
         public bool _showWindow = false;
 
         //GUI Component(MainWindow)
-        public Rect WindowRect = new Rect(10, 10, 300, 1000);
+        public Rect WindowRect = new Rect(10, 10, 300, 920);
         public Toggle controllEnable,irc01, irc02, irc03;
         public SliderAndTextBox damping01, damping02, damping03, elasticity01, elasticity02, elasticity03,
             stiffness01, stiffness02, stiffness03, inert01, inert02, inert03;
@@ -67,10 +66,10 @@ namespace BreastPhysicsController
 
             s_dialog = new SaveDialog(this,_s_dialogID, "Save Preset", SDRect);
 
-            IEnumerable<string> xmls = System.IO.Directory.GetFiles(_presetDir, "*.xml").ToList();
+            IEnumerable<string> xmls = System.IO.Directory.GetFiles(BreastPhysicsController.PresetDir, "*.xml").ToList();
             xmls = xmls.Select(x => System.IO.Path.GetFileNameWithoutExtension(x));
             
-            presetSelect=new PresetSelect(_presetDir,"Load preset",137, 20, WindowRect.width - 45,WindowRect.height - 50);
+            presetSelect=new PresetSelect(BreastPhysicsController.PresetDir, "Load preset",137, 20, WindowRect.width - 45,WindowRect.height - 50);
         }
 
         public  void Draw(int windowID)
@@ -141,7 +140,7 @@ namespace BreastPhysicsController
                 if(GUILayout.Button("Load parameters from chara"))
                 {
                     BreastDynamicBoneController controller = ControllerManager.GetControllerByID(charaSelect.GetSelectedId());
-                    if (controller != null) controller.LoadParamsFromCharacter();
+                    if (controller != null) controller.LoadParamsFromGame();
                 }
 
                 GUILayout.BeginHorizontal();
@@ -241,6 +240,7 @@ namespace BreastPhysicsController
             inert03.SetValue(0);
         }
 
+        /*
         public void ApplyParameterToController(BreastDynamicBoneController controller)
         {
             controller.enable = controllEnable.GetValue();
@@ -267,8 +267,9 @@ namespace BreastPhysicsController
             controller.DynamicBoneParameter.dictParameterSet["cf_j_bust02_R"].CopyParameterFrom(controller.DynamicBoneParameter.dictParameterSet["cf_j_bust02_L"]);
             controller.DynamicBoneParameter.dictParameterSet["cf_j_bust03_R"].CopyParameterFrom(controller.DynamicBoneParameter.dictParameterSet["cf_j_bust03_L"]);
 
-            controller.needUpdate = true;
+            controller.needApplyToChara = true;
         }
+        */
 
         public bool CheckParameterChanged()
         {

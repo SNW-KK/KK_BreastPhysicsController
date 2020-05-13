@@ -110,7 +110,7 @@ namespace BreastPhysicsController
             }
             catch (Exception e)
             {
-                Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "Failed copy DynamicBoneParam to ParameterSetXML.");
+                BreastPhysicsController.Logger.Log(BepInEx.Logging.LogLevel.Warning, "Failed copy DynamicBoneParam to ParameterSetXML.");
                 return false;
             }
             return true;
@@ -128,7 +128,7 @@ namespace BreastPhysicsController
             }
             catch (Exception e)
             {
-                Logger.LogFormatted(BepInEx.Logging.LogLevel.Warning, "Failed copy DynamicBoneParam.");
+                BreastPhysicsController.Logger.Log(BepInEx.Logging.LogLevel.Warning, "Failed copy DynamicBoneParam.");
                 return false;
             }
             return true;

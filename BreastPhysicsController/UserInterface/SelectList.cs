@@ -37,9 +37,8 @@ namespace BreastPhysicsController
             _height2 = listHeight;
         }
 
-        public bool Draw()
+        public virtual bool Draw()
         {
-            //GUILayout.BeginVertical();
 
             if (_list==null || _list.Length==0)
             {
@@ -89,8 +88,6 @@ namespace BreastPhysicsController
                 }
                 
             }
-
-            //GUILayout.EndVertical();
 
             return changed;
         }

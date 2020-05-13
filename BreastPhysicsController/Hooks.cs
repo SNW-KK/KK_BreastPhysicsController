@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Harmony;
+using HarmonyLib;
+using BepInEx.Harmony;
+using ExtensibleSaveFormat;
 using BepInEx.Logging;
 using KKAPI;
 
@@ -12,24 +14,16 @@ namespace BreastPhysicsController
     {
         public static void InstallHooks()
         {
-            var harmony = Harmony.HarmonyInstance.Create(BreastPhysicsController.GUID);
-            harmony.PatchAll(typeof(Hooks));
+            var harmony = HarmonyWrapper.PatchAll(typeof(Hooks));
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(BustSoft), "ReCalc")]
         public static void BustSoftReCalc(BustSoft __instance)
         {
             BreastDynamicBoneController controller = ControllerManager.GetControllerByBustSoft(__instance);
-            if(controller!=null)
+            if(controller!=null && controller.Started)
             {
-                //if (controller.needInitialLoad)
-                //{
-                //    controller.InitialLoadParameter();
-                //}
-                if (controller.enable)
-                {
-                    controller.needUpdate = true;
-                }
+                controller.OnBustSoftRecalc();
             }
 
         }
