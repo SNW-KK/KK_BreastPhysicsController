@@ -30,6 +30,26 @@ namespace BreastPhysicsController
         public bool haveBackup;
         public bool charaHaveOrgParam;
 
+        protected override void Awake()
+        {
+            controllerID = this.GetInstanceID();
+            ControllerManager.AddController(this);
+
+            enable = false;
+            needBackup = false;
+            needRestore = false;
+            needApplyToChara = false;
+            haveBackup = false;
+            charaHaveOrgParam = true;
+
+            orgParamL = new List<BreastDynamicBoneParameter.ParameterSet>();
+            orgParticlePtnL = new List<BreastDynamicBoneParameter.ParameterSet>();
+            orgParamR = new List<BreastDynamicBoneParameter.ParameterSet>();
+            orgParticlePtnR = new List<BreastDynamicBoneParameter.ParameterSet>();
+
+            base.Awake();
+        }
+
         private void LateUpdate()
         {
             //Backup
@@ -57,25 +77,36 @@ namespace BreastPhysicsController
 
             if (ChaControl.sex == 1) //Female
             {
-                //test中
+                
                 enable = false;
                 needBackup = false;
                 needRestore = false;
                 needApplyToChara = false;
-                haveBackup = false;
-                charaHaveOrgParam = true;
 
-                //以下必須
-                BreastPhysicsController.w_NeedUpdateCharaList = true;
+                //isRotationCalc and Inert become previous character's parameters when load card in Maker if previous character's controller is enabled.
+                //so if previous character's controller have backup, force restore original parameters at first.
+                if (haveBackup)
+                {
+                    needRestore = true;
+                    charaHaveOrgParam = false;
+                }
+                else
+                {
+                    charaHaveOrgParam = true;
+
+                    orgParamL.Clear();
+                    orgParticlePtnL.Clear();
+                    orgParamR.Clear();
+                    orgParticlePtnR.Clear();
+                }
 
                 DynamicBoneParameter = new BreastDynamicBoneParameter(this);
-                orgParamL = new List<BreastDynamicBoneParameter.ParameterSet>();
-                orgParticlePtnL = new List<BreastDynamicBoneParameter.ParameterSet>();
-                orgParamR = new List<BreastDynamicBoneParameter.ParameterSet>();
-                orgParticlePtnR = new List<BreastDynamicBoneParameter.ParameterSet>();
-                controllerID = this.GetInstanceID();
+                BreastPhysicsController.w_NeedUpdateCharaList = true;
 
-                LoadExtendedData();
+                if (!LoadExtendedData())
+                {
+                    ChaControl.ReSetupDynamicBoneBust();
+                }
             }
             else //Male
             {
@@ -168,11 +199,12 @@ namespace BreastPhysicsController
 
         protected override void OnDestroy()
         {
+            ControllerManager.RemoveController(controllerID);
             BreastPhysicsController.w_NeedUpdateCharaList = true;
             base.OnDestroy();
         }
 
-        private void LoadExtendedData()
+        private bool LoadExtendedData()
         {
 
             var data = GetExtendedData();
@@ -193,11 +225,11 @@ namespace BreastPhysicsController
                             enable = true;
                             needBackup = true;
                             needApplyToChara = true;
+                            return true;
                         }
                         else
                         {
                             BreastPhysicsController.Logger.Log(LogLevel.Info, "Loaded parameters from ExtendedData. but BrestDynamicBoneController is disabled.");
-                            return;
                         }
                     }
                     else
@@ -214,6 +246,8 @@ namespace BreastPhysicsController
             {
                 BreastPhysicsController.Logger.Log(LogLevel.Info, "DynamicBoneParameter is not saved in card.");
             }
+
+            return false;
         }
 
         private bool BackupOriginalParameter()
@@ -349,8 +383,9 @@ namespace BreastPhysicsController
             }
             else return false;
 
-            breastL.ResetPosition();
-            breastR.ResetPosition();
+            //breastL.ResetPosition();
+            //breastR.ResetPosition();
+            ChaControl.ReSetupDynamicBoneBust();
             charaHaveOrgParam = false;
             needApplyToChara = false;
             return true;

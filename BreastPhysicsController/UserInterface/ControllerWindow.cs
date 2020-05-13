@@ -40,9 +40,9 @@ namespace BreastPhysicsController
 
         private void InitGUI()
         {
-
-            charaSelect = new CharaSelect(ControllerManager.GetAllController().Select(x => x.ChaFileControl.parameter.fullname).ToArray(),
-                ControllerManager.GetAllController().Select(x => x.controllerID).ToArray(), "No character loaded", WindowRect.width-20, 25, WindowRect.width - 35, WindowRect.height-50);
+            List<BreastDynamicBoneController> controllers = ControllerManager.GetAllController();
+            charaSelect = new CharaSelect(controllers.Select(x => x.ChaFileControl.parameter.fullname).ToArray(),
+                controllers.Select(x => x.controllerID).ToArray(), "No character loaded", WindowRect.width-20, 25, WindowRect.width - 35, WindowRect.height-50);
 
             controllEnable = new Toggle("Enable controller", false);
 

@@ -17,16 +17,28 @@ namespace BreastPhysicsController
             var harmony = HarmonyWrapper.PatchAll(typeof(Hooks));
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(BustSoft), "ReCalc")]
-        public static void BustSoftReCalc(BustSoft __instance)
+        //for performance imporovement. but it makes them less compatible with other logic.
+        [HarmonyPrefix, HarmonyPatch(typeof(BustSoft), "ReCalc")]
+        public static bool BustSoft_ReCalc_Pre(BustSoft __instance)
         {
             BreastDynamicBoneController controller = ControllerManager.GetControllerByBustSoft(__instance);
-            if(controller!=null && controller.Started)
+            if (controller != null && controller.enable)
             {
-                controller.OnBustSoftRecalc();
+                return false;
             }
-
+            return true;
         }
+
+        //this is safe code, but It degrades performance especially when used with ABMX
+        //[HarmonyPostfix, HarmonyPatch(typeof(BustSoft), "ReCalc")]
+        //public static void BustSoft_ReCalc_Post(BustSoft __instance)
+        //{
+        //    BreastDynamicBoneController controller = ControllerManager.GetControllerByBustSoft(__instance);
+        //    if(controller!=null && controller.Started)
+        //    {
+        //        controller.OnBustSoftRecalc();
+        //    }
+        //}
     }
 }
 

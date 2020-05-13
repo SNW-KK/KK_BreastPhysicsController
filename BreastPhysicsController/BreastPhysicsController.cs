@@ -33,6 +33,7 @@ namespace BreastPhysicsController
         public static bool w_NeedUpdateCharaList;
         public static bool w_NeedUpdateValue;
 
+
         private void Awake()
         {
             Logger = base.Logger;
