@@ -221,7 +221,7 @@ namespace BreastPhysicsController
 #endif
                         if ((bool)cardEnable)
                         {
-                            BreastPhysicsController.Logger.Log(LogLevel.Info, "Loaded parameters from ExtendedData(Character Card).");
+                            BreastPhysicsController.Logger.LogInfo("Loaded parameters from ExtendedData(Character Card).");
                             enable = true;
                             needBackup = true;
                             needApplyToChara = true;
@@ -229,22 +229,28 @@ namespace BreastPhysicsController
                         }
                         else
                         {
-                            BreastPhysicsController.Logger.Log(LogLevel.Info, "Loaded parameters from ExtendedData. but BrestDynamicBoneController is disabled.");
+                            BreastPhysicsController.Logger.LogWarning("Loaded parameters from ExtendedData. but BrestDynamicBoneController is disabled.");
                         }
                     }
                     else
                     {
-                        BreastPhysicsController.Logger.Log(LogLevel.Info, "Loaded parameters from ExtendedData is invalid. BrestDynamicBoneController is disabled.");
+#if DEBUG
+                        BreastPhysicsController.Logger.LogDebug("Loaded parameters from ExtendedData is invalid. BrestDynamicBoneController is disabled.");
+#endif
                     }
                 }
                 else
                 {
-                    BreastPhysicsController.Logger.Log(LogLevel.Warning, "Loaded parameters from ExtendedData is invalid. BrestDynamicBoneController is disabled.");
+#if DEBUG
+                    BreastPhysicsController.Logger.LogDebug("Loaded parameters from ExtendedData is invalid. BrestDynamicBoneController is disabled.");
+#endif
                 }
             }
             else
             {
-                BreastPhysicsController.Logger.Log(LogLevel.Info, "DynamicBoneParameter is not saved in card.");
+#if DEBUG
+                BreastPhysicsController.Logger.LogDebug("DynamicBoneParameter is not saved in card.");
+#endif
             }
 
             return false;
@@ -287,7 +293,7 @@ namespace BreastPhysicsController
             }
             else
             {
-                BreastPhysicsController.Logger.Log(LogLevel.Warning, "Failed backup original Params and ParticlePtns of BreastL");
+                BreastPhysicsController.Logger.LogWarning("Failed backup original Params and ParticlePtns of BreastL");
                 return false;
             }
 
@@ -324,7 +330,7 @@ namespace BreastPhysicsController
             }
             else
             {
-                BreastPhysicsController.Logger.Log(LogLevel.Warning, "Failed backup original Params and ParticlePtns of BreastR");
+                BreastPhysicsController.Logger.LogWarning( "Failed backup original Params and ParticlePtns of BreastR");
                 return false;
             }
 #if DEBUG
@@ -559,17 +565,17 @@ namespace BreastPhysicsController
 
             if (!haveValidDynamicBoneParam())
             {
-                BreastPhysicsController.Logger.Log(LogLevel.Error, "LoadParamsFromCharacter:Failed haveValidDynamicBoneParam");
+                BreastPhysicsController.Logger.LogWarning( "LoadParamsFromCharacter:Failed haveValidDynamicBoneParam");
                 return false;
             }
             bool success= DynamicBoneParameter.LoadParamsFromCharacter(this);
             if(success)
             {
-                BreastPhysicsController.Logger.Log(LogLevel.Info, "LoadParamsFromCharacter:Success LoadParamsFromCharacter");
+                BreastPhysicsController.Logger.LogWarning("LoadParamsFromCharacter:Success LoadParamsFromCharacter");
                 BreastPhysicsController.w_NeedUpdateValue = true;
                 return true;
             }
-            BreastPhysicsController.Logger.Log(LogLevel.Error, "LoadParamsFromCharacter:Failed LoadParamsFromCharacter");
+            BreastPhysicsController.Logger.LogWarning("LoadParamsFromCharacter:Failed LoadParamsFromCharacter");
             return false;
         }
 
