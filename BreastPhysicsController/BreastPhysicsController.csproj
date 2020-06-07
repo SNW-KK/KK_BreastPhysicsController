@@ -69,22 +69,59 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigGlobal.cs" />
+    <Compile Include="CharaParamControl.cs" />
+    <Compile Include="ParamChangedInfo.cs" />
+    <Compile Include="PluginPath.cs" />
+    <Compile Include="UI\EditorHip.cs" />
+    <Compile Include="UI\MessageBox.cs" />
+    <Compile Include="UI\Parts\SelectableButton.cs" />
+    <Compile Include="UI\PartsCustom\CharaSelect.cs" />
+    <Compile Include="UI\PartsCustom\ToggleEnabled.cs" />
+    <Compile Include="UI\Parts\SliderTextRef.cs" />
+    <Compile Include="UI\Parts\ToggleRef.cs" />
+    <Compile Include="UI\ToolsWindow.cs" />
+    <Compile Include="UI\Util\ResourceLoader.cs" />
+    <Compile Include="UI\Util\Skin.cs" />
+    <Compile Include="UI\Util\Style.cs" />
+    <Compile Include="UI\Util\WindowID.cs" />
+    <Compile Include="XMLParamBust.cs" />
+    <Compile Include="XMLParamHip.cs" />
+    <Compile Include="XMLParamSet.cs" />
+    <Compile Include="XMLPresetIO.cs" />
+    <Compile Include="Compatibility\BreastDynamicBoneParameter.cs" />
     <Compile Include="BreastPhysicsController.cs" />
-    <Compile Include="BreastDynamicBoneController.cs" />
-    <Compile Include="BreastDynamicBoneParameter.cs" />
-    <Compile Include="ControllerManager.cs" />
-    <Compile Include="UserInterface\CharaSelect.cs" />
-    <Compile Include="UserInterface\PresetSelect.cs" />
-    <Compile Include="UserInterface\SelectList.cs" />
-    <Compile Include="UserInterface\SliderTextSet.cs" />
-    <Compile Include="UserInterface\SaveDialog.cs" />
-    <Compile Include="UserInterface\Toggle.cs" />
-    <Compile Include="UserInterface\ControllerWindow.cs" />
+    <Compile Include="ExtendedDataIO.cs" />
+    <Compile Include="ParamBustOrg.cs" />
+    <Compile Include="ParamCharaController.cs" />
+    <Compile Include="ParamBone.cs" />
+    <Compile Include="ParamBustCustom.cs" />
+    <Compile Include="DBControllerManager.cs" />
+    <Compile Include="ParamChara.cs" />
+    <Compile Include="ParamHipOrg.cs" />
+    <Compile Include="ParamHipCustom.cs" />
+    <Compile Include="ParamBackup.cs" />
+    <Compile Include="UI\PartsCustom\CoordinateSelect.cs" />
+    <Compile Include="UI\EditorBust.cs" />
+    <Compile Include="UI\PartsCustom\PresetSelect.cs" />
+    <Compile Include="UI\Parts\SelectList.cs" />
+    <None Include="UI\Parts\SliderTextSet.cs" />
+    <Compile Include="UI\DialogSavePreset.cs" />
+    <Compile Include="UI\Parts\Toggle.cs" />
+    <Compile Include="UI\ControllerWindow.cs" />
     <Compile Include="Hooks.cs" />
-    <Compile Include="Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="XMLDynamicBoneParameter.cs" />
+    <Compile Include="Compatibility\XMLDynamicBoneParameter.cs" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="UI\Resource\TexWindowInside.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="UI\Resource\TexWindowContents.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="UI\Resource\TexWindowBase.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

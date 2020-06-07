@@ -1,46 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using BepInEx;
 using BepInEx.Logging;
+using BepInEx.Configuration;
 using UnityEngine;
 using System.IO;
 using System.Reflection;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using KKAPI.Chara;
+using BreastPhysicsController.UI;
+using BreastPhysicsController.UI.Util;
 
 
 namespace BreastPhysicsController
 {
     [BepInPlugin(GUID : GUID , Name : Name, Version : Version)]
+    [BepInDependency("marco.kkapi", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("KK_com.bepis.bepinex.configurationmanager", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("com.bepis.bepinex.extendedsave",BepInDependency.DependencyFlags.HardDependency)]
     public class BreastPhysicsController : BaseUnityPlugin
     {
         public const string GUID = "com.snw.bepinex.breastphysicscontroller";
         public const string Name = "BreastPhysicsController";
-        public const string Version = "1.2";
+        public const string Version = "2.0";
         public static string PresetDir;
 
         internal static new ManualLogSource Logger;
 
         public static ControllerWindow window;
-        private const int windowID = 1192;
-        private const int s_dialogID = 1193;
-
-        //Flags for Window
-        public static bool w_NeedUpdateCharaList;
-        public static bool w_NeedUpdateValue;
+        //private const int windowID = 1192;
+        //private const int s_dialogID = 1193;
+        //private const int toolsWindowID = 1194;
 
 
         private void Awake()
         {
             Logger = base.Logger;
             Hooks.InstallHooks();
+            BindConfig();
             PresetDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Name);
-            w_NeedUpdateCharaList = false;
-            w_NeedUpdateValue = false;
         }
 
         private void Start()
@@ -58,117 +54,114 @@ namespace BreastPhysicsController
                 }
             }
 
-            CharacterApi.RegisterExtraBehaviour<BreastDynamicBoneController>(BreastDynamicBoneController.GUID);
-            window = new ControllerWindow(windowID, s_dialogID);
+            CharacterApi.RegisterExtraBehaviour<ParamCharaController>(GUID);
+            window = new ControllerWindow(WindowID.GetNewID(), WindowID.GetNewID(), WindowID.GetNewID());
         }
 
         public void Update()
         {
-            if (Input.GetKeyDown(KeyCode.P))
+            if (ConfigGlobal.showWindowKey.Value.IsDown())
             {
                 if (window._showWindow) window._showWindow = false;
                 else window._showWindow = true;
             }
+
+            //if (Input.GetKeyDown(KeyCode.P))
+            //{
+            //    if (window._showWindow) window._showWindow = false;
+            //    else window._showWindow = true;
+            //}
+            
         }
 
         public void OnGUI()
         {
             if (window._showWindow)
             {
-                window.WindowRect = GUI.Window(1192, window.WindowRect, window.Draw, window._windowTitle);
-            }
-            UpdateWindow();
-
-            if (window.s_dialog._show)
-            {
-                window.s_dialog.OnGUI();
+                window.OnGUI();
             }
         }
 
-        public void UpdateWindow()
+        void BindConfig()
         {
-            //For ControllerWindow
-            //Changed selected character
-            if (window.charaSelect.changed)
-            {
-                window.charaSelect.changed = false;
-                //Logger.LogFormatted(LogLevel.Debug, "Changed selected character");
-                BreastDynamicBoneController controller = ControllerManager.GetControllerByID(window.charaSelect.GetSelectedId());
-                if (controller != null)
-                {
-                    window.RefreshValue();
-                }
-                else
-                {
-                    window.ResetWindowValue();
-                }
-            }
+            const string DESC_DEFAULTSTATUSMODE = "When loaded character, set parameters and states saved as default status and enable controller.\r\n" +
+                "DontUse :  Don't load default status always.\r\n"+
+                "UseDefaultStatus : Load default status into the character and enable controller if the character don't have plugin's data or controller is disabled in the data.\r\n"+
+                "ForceDefaultStatus : always load default status and enable controller.(Overwrite loaded data from card by default status.)";
+                
 
-            //Need update charalist
-            if (w_NeedUpdateCharaList)
-            {
-                w_NeedUpdateCharaList = false;
-                w_NeedUpdateValue = true;
-                window.RefreshCharaList();
-            }
+            ConfigGlobal.defaultStatusMode = Config.Bind<ConfigGlobal.DefalutStatusMode>("Options",
+                "Using default status mode", ConfigGlobal.DefalutStatusMode.DontUse, DESC_DEFAULTSTATUSMODE);
 
-            //Need update window parameters
-            if (w_NeedUpdateValue)
-            {
-                w_NeedUpdateValue = false;
-                window.RefreshValue();
-            }
+            ConfigGlobal.showWindowKey = Config.Bind<KeyboardShortcut>("Shortcut",
+                 "Show controller",
+                 new KeyboardShortcut(KeyCode.P, new KeyCode[] { }),
+                 "key for show controller.");
+            ConfigGlobal.minGravity = Config.Bind<float>("Slider limits",
+                             "Gravity: Minimum value",
+                             -0.001f,
+                             "Minimum value of glavity slider.");
+            ConfigGlobal.minGravity.SettingChanged += ChangedSliderLimit;
 
-            //Enabled or Disabled
-            if (window.controllEnable.changed)
-            {
-                BreastDynamicBoneController controller = ControllerManager.GetControllerByID(window.charaSelect.GetSelectedId());
-                if(controller!=null)
-                {
-                    if (window.controllEnable.GetValue())
-                    {
-                        //window.ApplyParameterToController(controller);
-                        controller.enable = true;
-                        controller.OnEnableController();
-                    }
-                    else
-                    {
-                        controller.enable = false;
-                        controller.OnDisableController();
-                        //controller.onDisable = true;
-                    }
-                }
-            }
+            ConfigGlobal.maxGravity = Config.Bind<float>("Slider limits",
+                             "Gravity: Maximum value",
+                             0.001f,
+                             "Maximum value of glavity slider.");
+            ConfigGlobal.maxGravity.SettingChanged += ChangedSliderLimit;
 
-            //Changed Parameter
-            if (window.CheckParameterChanged())
-            {
-                window._parameterChanged = false;
-                BreastDynamicBoneController controller = ControllerManager.GetControllerByID(window.charaSelect.GetSelectedId());
-                //if(controller!=null) window.ApplyParameterToController(controller);//original
-                controller.OnWindowValueChanged(window);
-            }
+            ConfigGlobal.minDamping = Config.Bind<float>("Slider limits",
+                             "Damping: Minimum value",
+                             0,
+                             "Minimum value of damping slider.");
+            ConfigGlobal.minDamping.SettingChanged += ChangedSliderLimit;
 
-            //Preset was Loaded
-            if(window.presetSelect.changed)
-            {
-                window.presetSelect.changed = false;
-                string xmlPath = window.presetSelect.GetSelectedFilePath();
-                if(xmlPath!=null)
-                {
-                    BreastDynamicBoneController controller = ControllerManager.GetControllerByID(window.charaSelect.GetSelectedId());
-                    if (controller != null)
-                    {
-                        controller.DynamicBoneParameter.LoadFile(xmlPath);
-                        w_NeedUpdateValue = true;
-                    }
-                    
-                }
+            ConfigGlobal.maxDamping = Config.Bind<float>("Slider limits",
+                             "Damping: Maximum value",
+                             1,
+                             "Maximum value of damping slider.");
+            ConfigGlobal.maxDamping.SettingChanged += ChangedSliderLimit;
 
-                    
-            }
+            ConfigGlobal.minElasticity = Config.Bind<float>("Slider limits",
+                             "Elasticity: Minimum value",
+                             0,
+                             "Minimum value of elasticity slider.");
+            ConfigGlobal.minElasticity.SettingChanged += ChangedSliderLimit;
 
+            ConfigGlobal.maxElasticity = Config.Bind<float>("Slider limits",
+                             "Elasticity: Maximum value",
+                             1,
+                             "Maximum value of elasticity slider.");
+            ConfigGlobal.maxElasticity.SettingChanged += ChangedSliderLimit;
 
+            ConfigGlobal.minStiffness = Config.Bind<float>("Slider limits",
+                             "Stiffness: Minimum value",
+                             0,
+                             "Minimum value of stiffness slider.");
+            ConfigGlobal.minStiffness.SettingChanged += ChangedSliderLimit;
+
+            ConfigGlobal.maxStiffness = Config.Bind<float>("Slider limits",
+                             "Stiffness: Maximum value",
+                             1,
+                             "Maximum value of stiffness slider.");
+            ConfigGlobal.maxStiffness.SettingChanged += ChangedSliderLimit;
+
+            ConfigGlobal.minInert = Config.Bind<float>("Slider limits",
+                             "Inert: Minimum value",
+                             0,
+                             "Minimum value of inert slider.");
+            ConfigGlobal.minInert.SettingChanged += ChangedSliderLimit;
+
+            ConfigGlobal.maxInert = Config.Bind<float>("Slider limits",
+                             "Inert: Maximum value",
+                             1,
+                             "Maximum value of inert slider.");
+            ConfigGlobal.maxInert.SettingChanged += ChangedSliderLimit;
+
+        }
+
+        private void ChangedSliderLimit(object sender, EventArgs e)
+        {
+            window.ReloadConfig();
         }
 
     }
