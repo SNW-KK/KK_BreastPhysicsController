@@ -22,7 +22,7 @@ namespace BreastPhysicsController.UI.Parts
         protected int _selectedId;
         protected string _emptyString;
 
-        public CharaSelect(Dictionary<int, ParamCharaController> controllers, string emptyString, float buttonWidth, float buttonHeight, float listWidth, float listHeight)
+        public CharaSelect(Dictionary<int, ParamCharaController> controllers, string emptyString, float buttonWidth=0, float buttonHeight=0, float listWidth=0, float listHeight=0)
         {
             _emptyString = emptyString;
             _show = false;
@@ -54,16 +54,30 @@ namespace BreastPhysicsController.UI.Parts
                     }
                     string buttonLabel = _controllers[_selectedId].ChaFileControl.parameter.fullname;
 
-                    if (_width1 > 0)
+                    if (_width1 <= 0 && _height1 <= 0)
                     {
-                        if (GUILayout.Button(buttonLabel, GUILayout.Width(_width1), GUILayout.Height(_height1)))
+                        if (GUILayout.Button(buttonLabel))
+                        {
+                            _show = true;
+                        }
+                    }
+                    else if (_width1 <= 0)
+                    {
+                        if (GUILayout.Button(buttonLabel, GUILayout.Height(_height1)))
+                        {
+                            _show = true;
+                        }
+                    }
+                    else if (_height1 <= 0)
+                    {
+                        if (GUILayout.Button(buttonLabel, GUILayout.Height(_width1)))
                         {
                             _show = true;
                         }
                     }
                     else
                     {
-                        if (GUILayout.Button(buttonLabel, GUILayout.Height(_height1)))
+                        if (GUILayout.Button(buttonLabel, GUILayout.Width(_width1), GUILayout.Height(_height1)))
                         {
                             _show = true;
                         }
@@ -71,13 +85,27 @@ namespace BreastPhysicsController.UI.Parts
                 }
                 else
                 {
-                    if (_width2 > 0) _scroll = GUILayout.BeginScrollView(_scroll, false, true, GUILayout.Width(_width2 + 15), GUILayout.Height(_height2));
-                    else _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.Height(_controllers.Count() * _height1));
+                    if (_width2 <= 0 && _height2 <= 0)
+                    {
+                        _scroll = GUILayout.BeginScrollView(_scroll, false, true);
+                    }
+                    else if (_width2 <= 0)
+                    {
+                        _scroll = GUILayout.BeginScrollView(_scroll, false, true, GUILayout.Height(_height2));
+                    }
+                    else if (_height2 <= 0)
+                    {
+                        _scroll = GUILayout.BeginScrollView(_scroll, false, true, GUILayout.Height(_width2));
+                    }
+                    else
+                    {
+                        _scroll = GUILayout.BeginScrollView(_scroll, false, true, GUILayout.Width(_width2), GUILayout.Height(_height2));
+                    }
 
                     int selected = -1;
                     ParamCharaController[] buffControllers = _controllers.Values.ToArray();
                     string[] names = buffControllers.Select(x => x.ChaFileControl.parameter.fullname).ToArray();
-                    selected = GUILayout.SelectionGrid(selected, names, 1, GUILayout.Width(_width2), GUILayout.Height(names.Count() * (_height1)));
+                    selected = GUILayout.SelectionGrid(selected, names, 1);
 
                     if (selected > -1)
                     {
@@ -85,7 +113,7 @@ namespace BreastPhysicsController.UI.Parts
                         _selectedId = buffControllers[selected].controllerID;
                         _show = false;
                     }
-                    GUILayout.Space(_controllers.Count() * 1);
+                    GUILayout.Space(20);
                     GUILayout.EndScrollView();
                 }
 

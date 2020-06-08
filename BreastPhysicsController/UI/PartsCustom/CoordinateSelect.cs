@@ -9,7 +9,7 @@ namespace BreastPhysicsController.UI.Parts
     {
         ChaFileDefine.CoordinateType[] _coordinateType;
 
-        public CoordinateSelect(string[] list, ChaFileDefine.CoordinateType[] coordinateType, string emptyString, float buttonWidth, float buttonHeight, float listWidth, float listHeight)
+        public CoordinateSelect(string[] list, ChaFileDefine.CoordinateType[] coordinateType, string emptyString, float buttonWidth=0, float buttonHeight=0, float listWidth=0, float listHeight=0)
             : base(list,emptyString,false, buttonWidth, buttonHeight, listWidth, listHeight)
         {
             _coordinateType = coordinateType;

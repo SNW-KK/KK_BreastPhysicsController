@@ -51,7 +51,7 @@ namespace BreastPhysicsController.UI
         {
             //Character Select
             List<ParamCharaController> controllers = DBControllerManager.GetAllController();
-            charaSelect = new CharaSelect(DBControllerManager._controllers, "No character loaded", WindowRect.width-20, 25, WindowRect.width - 35, WindowRect.height-50);
+            charaSelect = new CharaSelect(DBControllerManager._controllers, "No character loaded", 0, 25);
 
             //Enbale Checkbox
             controllEnable = new ToggleEnabled("Enable controller", false);
@@ -72,7 +72,7 @@ namespace BreastPhysicsController.UI
             {
                 coordinateStringList.Add(coordinateList[i].ToString());
             }
-            coordinateSelect=new CoordinateSelect(coordinateStringList.ToArray(),coordinateList,"", 175, 25, WindowRect.width - 35, WindowRect.height - 50);
+            coordinateSelect = new CoordinateSelect(coordinateStringList.ToArray(), coordinateList, "",175,25);
 
             //State Select
             kindSelect = new SelectableButton<ParamCharaController.ParamsKind>(Color.cyan);
@@ -145,52 +145,64 @@ namespace BreastPhysicsController.UI
 
                     GUILayout.Space(Style.defaultSpace);
 
-                    //Coordinate Select
-                    GUILayout.Label("Select a coordinate and state.", Style.LabedMiddleSubject);
-                    GUILayout.BeginHorizontal();
-                    coordinateSelect.Draw();
-                    if (GUILayout.Button("Match state", styleMatchState))
+                    if(coordinateSelect._show)
                     {
-                        MatchWindowState(_controller);
+                        //Coordinate Select
+                        GUILayout.Label("Select a coordinate and state.", Style.LabedMiddleSubject);
+                        GUILayout.BeginHorizontal();
+                        coordinateSelect.Draw();
+                        GUILayout.EndHorizontal();
                     }
-                    GUILayout.EndHorizontal();
-                    GUILayout.Space(Style.defaultSpace);
-
-                    //State Select
-                    kindSelect.Draw();
-                    GUILayout.Space(Style.defaultSpace);
-
-                    //Parameter Editor
-                    switch (kindSelect.GetSelected())
+                    else
                     {
-                        case ParamCharaController.ParamsKind.Naked:
-                            changedParam = changedParam | editorBust.Draw(_controller,coordinateSelect.GetSelectedCoordinate(),ParamCharaController.ParamsKind.Naked);
-                            break;
-                        case ParamCharaController.ParamsKind.Bra:
-                            changedParam = changedParam | editorBust.Draw(_controller, coordinateSelect.GetSelectedCoordinate(), ParamCharaController.ParamsKind.Bra);
-                            break;
-                        case ParamCharaController.ParamsKind.Tops:
-                            changedParam = changedParam | editorBust.Draw(_controller, coordinateSelect.GetSelectedCoordinate(), ParamCharaController.ParamsKind.Tops);
-                            break;
-                        case ParamCharaController.ParamsKind.Hip:
-                            changedParam = changedParam | editorHip.Draw(_controller);
-                            break;
-                        default:
-                            break;
+                        //Coordinate Select
+                        GUILayout.Label("Select a coordinate and state.", Style.LabedMiddleSubject);
+                        GUILayout.BeginHorizontal();
+                        coordinateSelect.Draw();
+                        if (GUILayout.Button("Match state", styleMatchState))
+                        {
+                            MatchWindowState(_controller);
+                        }
+                        GUILayout.EndHorizontal();
+                        GUILayout.Space(Style.defaultSpace);
+
+                        //State Select
+                        kindSelect.Draw();
+                        GUILayout.Space(Style.defaultSpace);
+
+                        //Parameter Editor
+                        switch (kindSelect.GetSelected())
+                        {
+                            case ParamCharaController.ParamsKind.Naked:
+                                changedParam = changedParam | editorBust.Draw(_controller, coordinateSelect.GetSelectedCoordinate(), ParamCharaController.ParamsKind.Naked);
+                                break;
+                            case ParamCharaController.ParamsKind.Bra:
+                                changedParam = changedParam | editorBust.Draw(_controller, coordinateSelect.GetSelectedCoordinate(), ParamCharaController.ParamsKind.Bra);
+                                break;
+                            case ParamCharaController.ParamsKind.Tops:
+                                changedParam = changedParam | editorBust.Draw(_controller, coordinateSelect.GetSelectedCoordinate(), ParamCharaController.ParamsKind.Tops);
+                                break;
+                            case ParamCharaController.ParamsKind.Hip:
+                                changedParam = changedParam | editorHip.Draw(_controller);
+                                break;
+                            default:
+                                break;
+                        }
+
+                        //Button Load from chara
+                        if (GUILayout.Button("Load parameters from chara"))
+                        {
+                            _controller.LoadParamFromChara(coordinateSelect.GetSelectedCoordinate(), kindSelect.GetSelected());
+                        }
+
+                        //Tools
+                        if (GUILayout.Button("Tools"))
+                        {
+                            if (tools._show) tools.Hide();
+                            else tools.Show(new Vector2(WindowRect.position.x + 300, WindowRect.position.y + 700));
+                        }
                     }
 
-                    //Button Load from chara
-                    if (GUILayout.Button("Load parameters from chara"))
-                    {
-                        _controller.LoadParamFromChara(coordinateSelect.GetSelectedCoordinate(),kindSelect.GetSelected());
-                    }
-
-                    //Tools
-                    if (GUILayout.Button("Tools"))
-                    {
-                        if (tools._show) tools.Hide();
-                        else tools.Show(new Vector2(WindowRect.position.x+300,WindowRect.position.y+700));
-                    }
                 }
 
             }

@@ -59,11 +59,11 @@ namespace BreastPhysicsController.UI
             {
                 coordinateStringList.Add(coordinateList[i].ToString());
             }
-            coordinateSelect = new CoordinateSelect(coordinateStringList.ToArray(), coordinateList, "", WindowRect.width - 180, 20, WindowRect.width - 180, WindowRect.height - 50);
+            coordinateSelect = new CoordinateSelect(coordinateStringList.ToArray(), coordinateList, "");
 
             //Preset select
-            presetSelectBust = new PresetSelect(PluginPath.presetDirBust, "Load Bust preset", (WindowRect.width - 25)/2, 20, WindowRect.width - 45, WindowRect.height - 50);
-            presetSelectHip = new PresetSelect(PluginPath.presetDirHip, "Load Hip preset", (WindowRect.width - 25)/2, 20, WindowRect.width - 45, WindowRect.height - 50);
+            presetSelectBust = new PresetSelect(PluginPath.presetDirBust, "Load Bust preset", 0, 20);
+            presetSelectHip = new PresetSelect(PluginPath.presetDirHip, "Load Hip preset", 0, 20);
 
             //Save dialog
             s_dialog = new DialogSavePreset(_parent, _s_dialogID, "Save preset", SDRect);
@@ -135,69 +135,97 @@ namespace BreastPhysicsController.UI
                 GUILayout.EndHorizontal();
                 GUILayout.EndArea();
 
-                //Copy tools
-                GUILayout.BeginArea(new Rect(3, 84, WindowRect.width - 10, 80), Style.WindowContents);
-                GUILayout.Label("Copy",Style.LabedMiddleSubject);
-                if (GUILayout.Button("Copy parameter set to all coordinates"))
+                //if show destination coordinate for copy, dont draw area under Copy tools.
+                //dont forget to expand area.
+                if (coordinateSelect._show)
                 {
-                    _parent.GetSelectedController().CopyParamAllCoordinate(_parent.GetSelectedCoordinate());
-                    msgBox.Show("Copied parameter set to all coordinates.");
-                }
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Copy parameter set"))
-                {
-                    _parent.GetSelectedController().CopyParamCoordinate(_parent.GetSelectedCoordinate(), coordinateSelect.GetSelectedCoordinate());
-                    msgBox.Show("Copied parameter set\r\n"+ _parent.GetSelectedCoordinate()+" to "+ coordinateSelect.GetSelectedCoordinate());
-
-                }
-                GUILayout.Label("to", Style.LabedMiddleSubject);
-                coordinateSelect.Draw();
-                GUILayout.EndHorizontal();
-                GUILayout.EndArea();
-
-                //Preset Load
-                GUILayout.BeginArea(new Rect(3, 167, WindowRect.width - 10, 80), Style.WindowContents);
-                GUILayout.Label("Preset",Style.LabedMiddleSubject);
-                GUILayout.BeginHorizontal();
-                presetSelectBust.Draw();
-                presetSelectHip.Draw();
-                GUILayout.EndHorizontal();
-
-                //Preset Save
-                if (GUILayout.Button("Save preset"))
-                {
-                    s_dialog._show = true;
-                }
-                GUILayout.EndArea();
-
-                //For default parameter
-                GUILayout.BeginArea(new Rect(3, 250, WindowRect.width - 10, 55), Style.WindowContents);
-                GUILayout.Label("Default Status",Style.LabedMiddleSubject);
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Save as default"))
-                {
-                    if (_parent.GetSelectedController().SaveDefaultStatus())
+                    //Copy tools
+                    GUILayout.BeginArea(new Rect(3, 84, WindowRect.width - 10, 254), Style.WindowContents); //expand area than when coordinateSelect isnt shown.
+                    GUILayout.Label("Copy", Style.LabedMiddleSubject);
+                    if (GUILayout.Button("Copy parameter set to all coordinates"))
                     {
-                        msgBox.Show("Saved default status");
+                        _parent.GetSelectedController().CopyParamAllCoordinate(_parent.GetSelectedCoordinate());
+                        msgBox.Show("Copied parameter set to all coordinates.");
                     }
-                }
-                if (GUILayout.Button("Load default"))
-                {
-                    if(_parent.GetSelectedController().LoadDefaultStatus(false))
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("Copy parameter set"))
                     {
-                        msgBox.Show("Loaded default status");
+                        _parent.GetSelectedController().CopyParamCoordinate(_parent.GetSelectedCoordinate(), coordinateSelect.GetSelectedCoordinate());
+                        msgBox.Show("Copied parameter set\r\n" + _parent.GetSelectedCoordinate() + " to " + coordinateSelect.GetSelectedCoordinate());
+
                     }
-
+                    GUILayout.Label("to", Style.LabedMiddleSubject);
+                    coordinateSelect.Draw();
+                    GUILayout.EndHorizontal();
+                    GUILayout.EndArea();
                 }
-                GUILayout.EndHorizontal();
-                GUILayout.EndArea();
-
-                GUILayout.BeginArea(new Rect(3, 308, WindowRect.width - 10, 30), Style.WindowContents);
-                if (GUILayout.Button("Close this window"))
+                else
                 {
-                    _show = false;
+                    //Copy tools
+                    GUILayout.BeginArea(new Rect(3, 84, WindowRect.width - 10, 80), Style.WindowContents);
+                    GUILayout.Label("Copy", Style.LabedMiddleSubject);
+                    if (GUILayout.Button("Copy parameter set to all coordinates"))
+                    {
+                        _parent.GetSelectedController().CopyParamAllCoordinate(_parent.GetSelectedCoordinate());
+                        msgBox.Show("Copied parameter set to all coordinates.");
+                    }
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("Copy parameter set"))
+                    {
+                        _parent.GetSelectedController().CopyParamCoordinate(_parent.GetSelectedCoordinate(), coordinateSelect.GetSelectedCoordinate());
+                        msgBox.Show("Copied parameter set\r\n" + _parent.GetSelectedCoordinate() + " to " + coordinateSelect.GetSelectedCoordinate());
+
+                    }
+                    GUILayout.Label("to", Style.LabedMiddleSubject);
+                    coordinateSelect.Draw();
+                    GUILayout.EndHorizontal();
+                    GUILayout.EndArea();
+
+                    //Preset Load
+                    GUILayout.BeginArea(new Rect(3, 167, WindowRect.width - 10, 80), Style.WindowContents);
+                    GUILayout.Label("Preset", Style.LabedMiddleSubject);
+                    GUILayout.BeginHorizontal();
+                    presetSelectBust.Draw();
+                    presetSelectHip.Draw();
+                    GUILayout.EndHorizontal();
+
+                    //Preset Save
+                    if (GUILayout.Button("Save preset"))
+                    {
+                        s_dialog._show = true;
+                    }
+                    GUILayout.EndArea();
+
+                    //For default parameter
+                    GUILayout.BeginArea(new Rect(3, 250, WindowRect.width - 10, 55), Style.WindowContents);
+                    GUILayout.Label("Default Status", Style.LabedMiddleSubject);
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("Save as default"))
+                    {
+                        if (_parent.GetSelectedController().SaveDefaultStatus())
+                        {
+                            msgBox.Show("Saved default status");
+                        }
+                    }
+                    if (GUILayout.Button("Load default"))
+                    {
+                        if (_parent.GetSelectedController().LoadDefaultStatus(false))
+                        {
+                            msgBox.Show("Loaded default status");
+                        }
+
+                    }
+                    GUILayout.EndHorizontal();
+                    GUILayout.EndArea();
+
+                    GUILayout.BeginArea(new Rect(3, 308, WindowRect.width - 10, 30), Style.WindowContents);
+                    if (GUILayout.Button("Close this window"))
+                    {
+                        _show = false;
+                    }
+                    GUILayout.EndArea();
                 }
-                GUILayout.EndArea();
+
             }
 
             GUILayout.EndArea();

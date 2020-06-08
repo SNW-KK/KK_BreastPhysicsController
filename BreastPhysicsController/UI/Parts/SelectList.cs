@@ -23,7 +23,7 @@ namespace BreastPhysicsController.UI.Parts
         protected int _selectedIndex;
         protected string _emptyString;
 
-        public SelectList(string[] list,string emptyString,bool useEmptyStringAlways, float buttonWidth, float buttonHeight,float listWidth,float listHeight)
+        public SelectList(string[] list,string emptyString,bool useEmptyStringAlways, float buttonWidth=0, float buttonHeight=0, float listWidth = 0,float listHeight = 0)
         {
             _emptyString = emptyString;
             _useEmptyStringAlways = useEmptyStringAlways;
@@ -54,16 +54,31 @@ namespace BreastPhysicsController.UI.Parts
                     if (_useEmptyStringAlways) buttonLabel = _emptyString;
                     else buttonLabel = _list[_selectedIndex];
 
-                    if (_width1 > 0)
+
+                    if (_width1 <= 0 && _height1 <= 0)
                     {
-                        if (GUILayout.Button(buttonLabel, GUILayout.Width(_width1), GUILayout.Height(_height1)))
+                        if (GUILayout.Button(buttonLabel))
+                        {
+                            _show = true;
+                        }
+                    }
+                    else if (_width1 <= 0)
+                    {
+                        if (GUILayout.Button(buttonLabel, GUILayout.Height(_height1)))
+                        {
+                            _show = true;
+                        }
+                    }
+                    else if (_height1 <= 0)
+                    {
+                        if (GUILayout.Button(buttonLabel, GUILayout.Width(_width1)))
                         {
                             _show = true;
                         }
                     }
                     else
                     {
-                        if (GUILayout.Button(buttonLabel, GUILayout.Height(_height1)))
+                        if (GUILayout.Button(buttonLabel, GUILayout.Width(_width1), GUILayout.Height(_height1)))
                         {
                             _show = true;
                         }
@@ -71,19 +86,34 @@ namespace BreastPhysicsController.UI.Parts
                 }
                 else
                 {
-                    if(_width2>0) _scroll = GUILayout.BeginScrollView(_scroll, false,true,GUILayout.Width(_width2+15), GUILayout.Height(_height2));
-                    else _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.Height(_list.Count() * _height1));
+
+                    if (_width2<=0 && _height2 <= 0)
+                    {
+                        _scroll = GUILayout.BeginScrollView(_scroll, false, true);
+                    }
+                    else if(_width2<=0)
+                    {
+                        _scroll = GUILayout.BeginScrollView(_scroll, false, true,GUILayout.Height(_height2));
+                    }
+                    else if(_height2<=0)
+                    {
+                        _scroll = GUILayout.BeginScrollView(_scroll, false, true, GUILayout.Height(_width2));
+                    }
+                    else
+                    {
+                        _scroll = GUILayout.BeginScrollView(_scroll, false, true, GUILayout.Width(_width2), GUILayout.Height(_height2));
+                    }
 
                     int selected = -1;
-                    selected = GUILayout.SelectionGrid(selected, _list, 1, GUILayout.Width(_width2),GUILayout.Height(_list.Count() * (_height1)));
-                    
+                    selected = GUILayout.SelectionGrid(selected, _list, 1);
+
                     if (selected>-1)
                     {
                         changed = true;
                         _selectedIndex = selected;
                         _show = false;
                     }
-                    GUILayout.Space(_list.Count()*1);
+                    GUILayout.Space(20);
                     GUILayout.EndScrollView();
                 }
                 
