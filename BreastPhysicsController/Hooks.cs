@@ -37,9 +37,12 @@ namespace BreastPhysicsController
         //called clohes state changed.
         //clothesKind=0(tops),2(bra)
         //state=0(wearing),3(stripped)
-        [HarmonyPrefix,HarmonyPatch(typeof(ChaControl), "SetClothesState")]
-        public static void ChaControl_SetClothesState(ChaControl __instance, int clothesKind, byte state, bool next = true)
+        [HarmonyPostfix, HarmonyPatch(typeof(ChaControl), "SetClothesState")]
+        public static void ChaControl_SetClothesState_Post(ChaControl __instance, int clothesKind, byte state, bool next = true)
         {
+#if DEBUG
+            BreastPhysicsController.Logger.LogDebug("clothesKind:" + clothesKind.ToString() + " state:" + state.ToString());
+#endif
             DBControllerManager.GetControllerByChaControl(__instance)?.OnClothesStateChanged();
         }
     }

@@ -253,12 +253,10 @@ namespace BreastPhysicsController
             }
             endInitLoad = true;
         }
-        public void OnClothesStateChanged()
-        { 
-            changedInfo.SetInfo(GetNowCoordinate(), GetNowBustWear(), true, false);
 
-            //if (charaHaveOrgParam && !haveBackup) needBackup = true;
-            //needApplyToChara = true;
+        public void OnClothesStateChanged()
+        {
+            changedInfo.SetInfo(GetNowCoordinate(), GetNowBustWear(), true, false);
         }
 
         protected override void OnCardBeingSaved(GameMode currentGameMode)
