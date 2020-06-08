@@ -20,7 +20,7 @@ namespace BreastPhysicsController
     {
         public const string GUID = "com.snw.bepinex.breastphysicscontroller";
         public const string Name = "BreastPhysicsController";
-        public const string Version = "2.0";
+        public const string Version = "2.0.1";
         public static string PresetDir;
 
         internal static new ManualLogSource Logger;
