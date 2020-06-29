@@ -178,7 +178,6 @@ namespace BreastPhysicsController
 #if DEBUG
             BreastPhysicsController.Logger.LogDebug("Call OnReload");
 #endif
-            BreastPhysicsController.Logger.LogDebug("name:"+ChaControl.fileParam.firstname+ChaControl.fileParam.lastname+",HaveDynamicBone:"+HaveDynamicbone());
             if (ChaControl.sex == 1 && HaveDynamicbone()) //Female and HighPoly
             {
                 //Restore params from backup.

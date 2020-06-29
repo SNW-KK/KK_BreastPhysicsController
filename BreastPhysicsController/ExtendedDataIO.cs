@@ -120,15 +120,15 @@ namespace BreastPhysicsController
                     return true;
                 }
             }
-            catch (FileNotFoundException e)
+            catch (System.IO.IsolatedStorage.IsolatedStorageException e)
             {
-                BreastPhysicsController.Logger.LogError("Not found default parameter file.");
+                BreastPhysicsController.Logger.LogWarning("Not found default parameter file.");
                 paramChara = null;
                 return false;
             }
-            catch (Exception e)
+            catch (IOException e)
             {
-                BreastPhysicsController.Logger.LogError("Failed opening default parameter file.\r\n" + e.ToString());
+                BreastPhysicsController.Logger.LogWarning("Failed opening default parameter file.\r\n");
                 paramChara = null;
                 return false;
             }
