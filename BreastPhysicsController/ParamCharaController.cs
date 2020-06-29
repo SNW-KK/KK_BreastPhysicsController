@@ -178,8 +178,8 @@ namespace BreastPhysicsController
 #if DEBUG
             BreastPhysicsController.Logger.LogDebug("Call OnReload");
 #endif
-
-            if (ChaControl.sex == 1) //Female
+            BreastPhysicsController.Logger.LogDebug("name:"+ChaControl.fileParam.firstname+ChaControl.fileParam.lastname+",HaveDynamicBone:"+HaveDynamicbone());
+            if (ChaControl.sex == 1 && HaveDynamicbone()) //Female and HighPoly
             {
                 //Restore params from backup.
                 if (paramBackup != null)
@@ -201,10 +201,28 @@ namespace BreastPhysicsController
                 //Initialize fields
                 Init();
             }
-            else //Male
+            else //Male or LowPoly
             {
                 paramCustom = null;
+                paramBackup = null;
             }
+        }
+
+        private bool HaveDynamicbone()
+        {
+            //If not highPoly or dont have dynamicbone, ChaControl.getDynamicBoneBust() throw Null Reffrence Exception.
+            DynamicBone_Ver02 dynamicBone;
+            try
+            {
+                dynamicBone = ChaControl.getDynamicBoneBust(ChaInfo.DynamicBoneKind.BreastL);
+            }
+            catch(NullReferenceException e)
+            {
+                return false;
+            }
+            
+            if (dynamicBone != null) return true;
+            return false;
         }
 
         private void InitialLoadParams()
